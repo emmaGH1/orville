@@ -144,8 +144,13 @@ def run(
                                  github_create_uncertain=False)
                     trace.note(f"reconciled uncertain creation to issue #{issue_number} by report marker")
                 elif len(matches) == 0:
-                    state.update(report_id, github_create_uncertain=False)
-                    trace.note("reconciliation found no marker; creation did not take; proceeding with planning")
+                    # The bounded search cannot confirm or refute the creation.
+                    # Stay uncertain: a human reconciles before anything is created.
+                    fail("github", "uncertain github creation: report marker not found in the bounded issue search; "
+                                   "no create until a human reconciles (retryable)")
+                    apps["github"] = {"verified": False,
+                                      "reason": "creation uncertain; marker not found in bounded search"}
+                    trace.note("github creation stays uncertain; refusing to create again")
                 else:
                     result["status"] = "needs_human"
                     result["reason"] = f"report marker matches multiple issues {sorted(matches)}; human review required"

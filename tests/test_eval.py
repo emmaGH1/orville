@@ -327,6 +327,35 @@ def test_new_issue_create_unknown_reconciled_by_marker(tmp_path):
     assert r2["apps"]["github"]["issue_number"] == 3
 
 
+# Regression (bounded search): with >20 open issues, an uncertain creation
+# whose marker falls outside the bounded search window stays uncertain --
+# partial result, flag persists, and no retry ever creates again.
+def test_uncertain_create_missing_marker_in_bounded_search_stays_partial(tmp_path):
+    cfg = make_cfg(tmp_path)
+    issues = {n: f"Old issue {n}" for n in range(1, 26)}  # 25 open issues
+    gh = FakeGitHub(issues, lose_create=True, bounded_list=True)
+    cl = fresh_clients(github=gh)
+    r1 = run("BOUNDED-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r1["status"] == "partial", r1
+    assert len(gh.issues) == 26, "the create took effect but its response was lost"
+    from orville.state import RunState
+    assert RunState(cfg.state_dir).get("BOUNDED-1")["github_create_uncertain"] is True
+
+    # The marker issue (#26) is outside the bounded 20-issue window, so
+    # reconciliation cannot confirm it: stay uncertain, never recreate.
+    r2 = run("BOUNDED-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r2["status"] == "partial", r2
+    assert len(gh.issues) == 26, "must not create again while creation is unconfirmed"
+    assert RunState(cfg.state_dir).get("BOUNDED-1")["github_create_uncertain"] is True
+    assert any("no create until a human reconciles" in e for e in r2["errors"])
+    assert r2["apps"]["github"]["verified"] is False
+
+    # A third run behaves identically: deterministic fail-closed, no writes.
+    r3 = run("BOUNDED-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r3["status"] == "partial"
+    assert len(gh.issues) == 26
+
+
 # Regression (second pass 2): a reused Discord message missing the verified
 # Trello link must fail verification and keep the run partial.
 def test_discord_reuse_requires_both_links(tmp_path):

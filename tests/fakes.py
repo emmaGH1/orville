@@ -10,7 +10,7 @@ from orville.discord_client import DiscordOutcome
 class FakeGitHub:
     def __init__(self, issues: dict[int, str], fail_list_comments: bool = False,
                  fail_get_issue: bool = False, fail_get_issue_times: int = 0,
-                 lose_create: bool = False) -> None:
+                 lose_create: bool = False, bounded_list: bool = False) -> None:
         self._next = 1000  # comment ids
         self.issues = {n: {"title": t, "body": "", "html_url": f"https://github.test/issue/{n}"} for n, t in issues.items()}
         self.comments: dict[int, list[dict]] = {n: [] for n in self.issues}
@@ -19,10 +19,14 @@ class FakeGitHub:
         self.fail_get_issue = fail_get_issue
         self.fail_get_issue_times = fail_get_issue_times
         self.lose_create = lose_create
+        # Mimics the real client's unpaginated per_page=20 window: when the
+        # repository holds more issues, some are outside the search window.
+        self.bounded_list = bounded_list
 
     def list_open_issues(self, per_page: int = 20) -> list[dict]:
-        return [{"number": n, "title": d["title"], "body": d["body"], "html_url": d["html_url"]}
-                for n, d in self.issues.items()]
+        numbers = sorted(self.issues)[:per_page] if self.bounded_list else sorted(self.issues)
+        return [{"number": n, "title": self.issues[n]["title"], "body": self.issues[n]["body"],
+                 "html_url": self.issues[n]["html_url"]} for n in numbers]
 
     def create_comment(self, issue_number: int, body: str) -> dict:
         if issue_number not in self.comments:
