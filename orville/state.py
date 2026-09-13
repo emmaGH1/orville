@@ -47,5 +47,8 @@ class RunState:
         self._save()
 
     def _save(self) -> None:
-        with open(self.path, "w", encoding="utf-8") as f:
+        # Atomic replacement so a crash mid-write cannot corrupt prior state.
+        tmp = self.path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
             json.dump(self._data, f, indent=2)
+        os.replace(tmp, self.path)

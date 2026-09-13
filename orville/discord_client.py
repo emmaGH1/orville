@@ -30,8 +30,16 @@ class DiscordClient:
             try:
                 r = client.post(f"{self.webhook_url}?wait=true", json={"content": content})
             except httpx.TimeoutException as e:
+                # Discord may have accepted the message; the response was lost.
                 return DiscordOutcome("uncertain", detail=f"timeout without message ID: {e}")
+            except httpx.HTTPError as e:
+                # Transport or protocol failure; whether Discord accepted the
+                # message is unknown, so the outcome is uncertain, not failed.
+                return DiscordOutcome("uncertain", detail=f"transport error without message ID: {e}")
+            except Exception as e:  # unexpected pre/post-protocol error; outcome unknown
+                return DiscordOutcome("uncertain", detail=f"unknown error without message ID: {e}")
             if r.status_code not in (200, 204):
+                # A definitive HTTP status is a known failure, not an ambiguity.
                 return DiscordOutcome("failed", detail=f"HTTP {r.status_code} {r.text[:200]}")
             if r.status_code == 200:
                 data = r.json()

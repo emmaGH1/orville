@@ -4,6 +4,8 @@ Write surface is limited to issue comments, issue creation, and reads. There is
 no delete or close operation in this client by design.
 """
 
+import re
+
 import httpx
 
 API = "https://api.github.com"
@@ -58,7 +60,14 @@ class GitHubClient:
         if r.status_code != 200:
             raise GitHubError(f"get comment failed: HTTP {r.status_code}")
         data = r.json()
-        return {"id": data["id"], "body": data["body"], "html_url": data["html_url"]}
+        # issue_url ends with /issues/<number>; proves which issue owns the comment.
+        m = re.search(r"/issues/(\d+)$", data.get("issue_url") or "")
+        return {
+            "id": data["id"],
+            "body": data["body"],
+            "html_url": data["html_url"],
+            "issue_number": int(m.group(1)) if m else None,
+        }
 
     def create_issue(self, title: str, body: str) -> dict:
         r = self._request("POST", "issues", json={"title": title, "body": body})
@@ -72,7 +81,12 @@ class GitHubClient:
         if r.status_code != 200:
             raise GitHubError(f"get issue failed: HTTP {r.status_code}")
         data = r.json()
-        return {"number": data["number"], "title": data["title"], "html_url": data["html_url"]}
+        return {
+            "number": data["number"],
+            "title": data["title"],
+            "body": data.get("body") or "",
+            "html_url": data["html_url"],
+        }
 
     def list_comments(self, issue_number: int, per_page: int = 50) -> list[dict]:
         r = self._request("GET", f"issues/{issue_number}/comments", params={"per_page": per_page})
