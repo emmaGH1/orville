@@ -1,0 +1,27 @@
+# Private planning and production
+.hackathon/
+AGENTS.md
+demo-work/
+recordings/
+raw-assets/
+# Secrets and local state
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+# Generated output
+node_modules/
+.venv/
+venv/
+__pycache__/
+.next/
+dist/
+build/
+coverage/
+.DS_Store
+Thumbs.db
