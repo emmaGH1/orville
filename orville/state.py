@@ -1,23 +1,51 @@
 """Persisted run state: returned destination IDs saved immediately per report_id.
 
-Cross-process retry key. Stored in an ignored local directory. Losing this
-state is disclosed honestly: app-side markers allow dedupe recovery for GitHub
-and Trello, but Discord exactly-once cannot be guaranteed after local state
-loss, so an unverified Discord step is reconciled, never blind-reposted.
+Cross-process retry key. Stored in an ignored local directory. Each entry is
+bound to the immutable report content and the configured destinations: a
+report_id reused with different text or a different destination scope is
+rejected before any app write. Destination secrets (the Discord webhook token)
+are stored only as hashes, never raw. Losing this state is disclosed honestly:
+app-side markers allow dedupe recovery for GitHub and Trello, but Discord
+exactly-once cannot be guaranteed after local state loss, so an unverified
+Discord step is reconciled, never blind-reposted.
 """
 
+import hashlib
 import json
 import os
 from datetime import datetime, timezone
 
 
+def _normalize(text: str) -> str:
+    return " ".join((text or "").split())
+
+
+def _sha(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def make_binding(report_text: str, github_repo: str, trello_list_id: str,
+                 discord_webhook_url: str) -> dict:
+    """Immutable scope for a report_id: content plus destination identities.
+
+    The webhook URL embeds a secret token, so only its hash is persisted.
+    """
+    return {
+        "content": _sha(_normalize(report_text)),
+        "github_repo": github_repo,
+        "trello_list_id": trello_list_id,
+        "discord_webhook_hash": _sha(discord_webhook_url),
+    }
+
+
 def _empty() -> dict:
     return {
-        "github": {},       # issue_number, comment_id, html_url
+        "github": {},       # issue_number, comment_id, html_url, anchor
         "trello": {},       # card_id, url
         "discord": {},      # message_id, channel_id
         "discord_uncertain": False,
         "github_create_uncertain": False,
+        "binding": None,    # make_binding(...) once known
         "status": "incomplete",
         "updated_at": None,
     }
@@ -44,6 +72,8 @@ class RunState:
             entry["discord_uncertain"] = apps["discord_uncertain"]
         if "github_create_uncertain" in apps:
             entry["github_create_uncertain"] = apps["github_create_uncertain"]
+        if "binding" in apps:
+            entry["binding"] = apps["binding"]
         if status:
             entry["status"] = status
         entry["updated_at"] = datetime.now(timezone.utc).isoformat()

@@ -10,12 +10,14 @@ from orville.discord_client import DiscordOutcome
 class FakeGitHub:
     def __init__(self, issues: dict[int, str], fail_list_comments: bool = False,
                  fail_get_issue: bool = False, fail_get_issue_times: int = 0,
-                 lose_create: bool = False, bounded_list: bool = False) -> None:
+                 lose_create: bool = False, bounded_list: bool = False,
+                 fail_list_issues: bool = False) -> None:
         self._next = 1000  # comment ids
         self.issues = {n: {"title": t, "body": "", "html_url": f"https://github.test/issue/{n}"} for n, t in issues.items()}
         self.comments: dict[int, list[dict]] = {n: [] for n in self.issues}
         self.deleted: list = []
         self.fail_list_comments = fail_list_comments
+        self.fail_list_issues = fail_list_issues
         self.fail_get_issue = fail_get_issue
         self.fail_get_issue_times = fail_get_issue_times
         self.lose_create = lose_create
@@ -24,6 +26,8 @@ class FakeGitHub:
         self.bounded_list = bounded_list
 
     def list_open_issues(self, per_page: int = 20) -> list[dict]:
+        if self.fail_list_issues:
+            raise RuntimeError("simulated github outage on issue list")
         numbers = sorted(self.issues)[:per_page] if self.bounded_list else sorted(self.issues)
         return [{"number": n, "title": self.issues[n]["title"], "body": self.issues[n]["body"],
                  "html_url": self.issues[n]["html_url"]} for n in numbers]
@@ -65,10 +69,12 @@ class FakeGitHub:
         d = self.issues[issue_number]
         return {"number": issue_number, "title": d["title"], "body": d["body"], "html_url": d["html_url"]}
 
-    def list_comments(self, issue_number: int, per_page: int = 50) -> list[dict]:
+    def list_comments(self, issue_number: int, per_page: int = 50, page: int = 1) -> list[dict]:
         if self.fail_list_comments:
             raise RuntimeError("simulated github outage on comment list")
-        return list(self.comments.get(issue_number, []))
+        cs = self.comments.get(issue_number, [])
+        start = (page - 1) * per_page
+        return [dict(c) for c in cs[start:start + per_page]]
 
     def delete_issue(self, n: int) -> None:  # exists only to prove it is never called
         self.deleted.append(n)
@@ -106,13 +112,15 @@ class FakeTrello:
 
 
 class FakeDiscord:
-    """mode: ok | fail | uncertain | lost.
+    """mode: ok | fail | uncertain | lost | server_error.
     "lost" simulates a message delivered and then the response connection
-    reset: the message exists, but the caller receives an exception with no ID."""
+    reset: the message exists, but the caller receives an exception with no ID.
+    "server_error" simulates a 5xx response, which the real client classifies
+    as uncertain because the write may have taken effect."""
 
     def __init__(self) -> None:
         self.messages: list[dict] = []
-        self.mode = "ok"  # ok | fail | uncertain | lost
+        self.mode = "ok"  # ok | fail | uncertain | lost | server_error
 
     def post_message(self, content: str) -> DiscordOutcome:
         if self.mode == "lost":
@@ -120,7 +128,9 @@ class FakeDiscord:
             self.messages.append(m)
             raise ConnectionError("connection reset after Discord accepted the message")
         if self.mode == "fail":
-            return DiscordOutcome("failed", detail="simulated discord 500")
+            return DiscordOutcome("failed", detail="simulated discord 400 (definitive rejection)")
+        if self.mode == "server_error":
+            return DiscordOutcome("uncertain", detail="HTTP 500 simulated server failure")
         if self.mode == "uncertain":
             return DiscordOutcome("uncertain", detail="timeout without message ID")
         m = {"id": f"msg{len(self.messages) + 1}", "channel_id": "chan1", "content": content}

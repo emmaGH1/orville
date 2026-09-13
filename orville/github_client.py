@@ -88,8 +88,9 @@ class GitHubClient:
             "html_url": data["html_url"],
         }
 
-    def list_comments(self, issue_number: int, per_page: int = 50) -> list[dict]:
-        r = self._request("GET", f"issues/{issue_number}/comments", params={"per_page": per_page})
+    def list_comments(self, issue_number: int, per_page: int = 50, page: int = 1) -> list[dict]:
+        r = self._request("GET", f"issues/{issue_number}/comments",
+                          params={"per_page": per_page, "page": page})
         if r.status_code != 200:
             raise GitHubError(f"list comments failed: HTTP {r.status_code}")
         return [{"id": c["id"], "body": c["body"]} for c in r.json()]

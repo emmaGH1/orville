@@ -31,6 +31,10 @@ CHOICE_SCHEMA = {
 }
 
 
+class PlannerError(RuntimeError):
+    """Model call or response failed the Python-boundary validation."""
+
+
 class PlanChoice:
     def __init__(self, action: str, issue_number: int | None, confidence: float, ambiguous: bool, reasoning: str) -> None:
         self.action = action
@@ -50,11 +54,20 @@ class PlanDecision:
 
 
 class GroqPlanner:
+    # Bounded budget suitable for a live demo: at most 2 attempts of at most
+    # MODEL_TIMEOUT seconds each, then the runner returns a structured
+    # retryable error. Confidence in the response is a self-reported signal,
+    # not calibrated accuracy; code validation is the real gate.
+    MODEL_TIMEOUT_SECONDS = 20.0
+    MODEL_MAX_RETRIES = 1
+
     def __init__(self, base_url: str, model_id: str, api_key: str) -> None:
         from openai import OpenAI
 
         self.model_id = model_id
-        self._client = OpenAI(base_url=base_url, api_key=api_key)
+        self._client = OpenAI(base_url=base_url, api_key=api_key,
+                              timeout=self.MODEL_TIMEOUT_SECONDS,
+                              max_retries=self.MODEL_MAX_RETRIES)
 
     def plan(self, candidates: list[dict], report_text: str) -> PlanChoice:
         listing = "\n".join(
@@ -78,7 +91,14 @@ class GroqPlanner:
             temperature=0,
         )
         raw = resp.choices[0].message.content
-        data = json.loads(raw)
+        try:
+            data = json.loads(raw)
+        except (TypeError, json.JSONDecodeError) as e:
+            raise PlannerError(f"model returned a malformed response: {e}") from e
+        missing = [k for k in ("action", "issue_number", "confidence", "ambiguous", "reasoning")
+                   if k not in data]
+        if missing:
+            raise PlannerError(f"model response missing required fields: {', '.join(missing)}")
         return PlanChoice(
             action=data["action"],
             issue_number=data["issue_number"],

@@ -274,10 +274,13 @@ def test_comment_ownership_check(tmp_path):
     # lives on issue 2: the read-back ownership assertion must catch it.
     gh.comments[1] = []
     gh.create_comment(2, "[orville:OWN-1] misplaced")
+    from orville.state import make_binding
     state = {"github": {"issue_number": 1, "comment_id": 1001}, "trello": {}, "discord": {},
-             "discord_uncertain": False, "status": "incomplete", "updated_at": None}
+             "discord_uncertain": False, "github_create_uncertain": False,
+             "binding": make_binding(NEW_REPORT, cfg.github_repo, cfg.trello_list_id,
+                                     cfg.discord_webhook_url),
+             "status": "incomplete", "updated_at": None}
     import json as _json
-    from pathlib import Path
     state_dir = tmp_path / "state"
     state_dir.mkdir(parents=True)
     (state_dir / "runs.json").write_text(_json.dumps({"OWN-1": state}), encoding="utf-8")
@@ -354,6 +357,265 @@ def test_uncertain_create_missing_marker_in_bounded_search_stays_partial(tmp_pat
     r3 = run("BOUNDED-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
     assert r3["status"] == "partial"
     assert len(gh.issues) == 26
+
+
+# ---- Final review fixes ---------------------------------------------------
+
+def _seed_state(tmp_path, report_id, report_text, cfg, github: dict, trello: dict | None = None,
+                discord: dict | None = None, include_binding: bool = True) -> None:
+    """Write a runs.json entry directly, as a prior process would have left it."""
+    import json as _json
+    from orville.state import make_binding
+    state_dir = tmp_path / "state"
+    state_dir.mkdir(parents=True, exist_ok=True)
+    entry = {"github": github, "trello": trello or {}, "discord": discord or {},
+             "discord_uncertain": False, "github_create_uncertain": False,
+             "binding": make_binding(report_text, cfg.github_repo, cfg.trello_list_id,
+                                     cfg.discord_webhook_url) if include_binding else None,
+             "status": "incomplete", "updated_at": None}
+    data = {}
+    path = state_dir / "runs.json"
+    if path.exists():
+        data = _json.loads(path.read_text(encoding="utf-8"))
+    data[report_id] = entry
+    path.write_text(_json.dumps(data, indent=2), encoding="utf-8")
+
+
+# Final-review fix 1a: comment response lost after GitHub accepted it. The
+# anchor was persisted pre-POST, so the retry reconciles the SAME issue even
+# when the planner would now choose a different one.
+def test_lost_comment_response_retries_same_issue(tmp_path):
+    cfg = make_cfg(tmp_path)
+
+    class LostComment(FakeGitHub):
+        def create_comment(self, issue_number, body):
+            result = super().create_comment(issue_number, body)
+            if issue_number == 1:
+                raise ConnectionError("accepted but response lost")
+            return result
+
+    from orville.planner import PlanChoice
+
+    class OtherPlanner:
+        """A planner that would legitimately choose issue #2 on a fresh run."""
+        def plan(self, candidates, report):
+            return PlanChoice("existing", 2, 0.95, False, "different plausible choice on retry")
+
+    gh = LostComment(CANDIDATES)
+    cl = fresh_clients(github=gh)
+    r1 = run("LOSTC-1", HARBOR_REPORT, cfg, clients=cl, planner=StubPlanner("normal"))
+    assert r1["status"] == "partial", r1
+    assert len(gh.comments[1]) == 1, "GitHub accepted the comment despite the lost response"
+
+    r2 = run("LOSTC-1", HARBOR_REPORT, cfg, clients=cl, planner=OtherPlanner())
+    assert r2["status"] == "complete", r2
+    assert len(gh.comments[1]) == 1, "retry must reconcile the recorded issue, not duplicate"
+    assert len(gh.comments[2]) == 0, "retry must not replan onto another issue"
+    assert r2["apps"]["github"]["issue_number"] == 1
+
+
+# Final-review fix 1b: a marker comment beyond the first 50 results is still
+# found (pagination), so the retry adopts it instead of writing a duplicate.
+def test_marker_beyond_first_page_adopted(tmp_path):
+    cfg = make_cfg(tmp_path)
+    gh = FakeGitHub(CANDIDATES)
+    for i in range(60):
+        gh.comments[1].append({"id": 5000 + i, "body": f"unrelated traffic {i}",
+                               "issue_number": 1, "html_url": f"https://github.test/x/{i}"})
+    gh.comments[1].append({"id": 9999, "body": f"[orville:PAGEd-1] lost comment",
+                           "issue_number": 1, "html_url": "https://github.test/x/lost"})
+    _seed_state(tmp_path, "PAGEd-1", HARBOR_REPORT, cfg,
+                github={"issue_number": 1, "anchor": "existing", "pending": "comment"})
+    cl = fresh_clients(github=gh)
+    r = run("PAGEd-1", HARBOR_REPORT, cfg, clients=cl, planner=StubPlanner("normal"))
+    assert r["status"] == "complete", r
+    assert len(gh.comments[1]) == 61, "must adopt the paged marker comment, not write another"
+    assert r["apps"]["github"]["id"] == 9999
+
+
+# Final-review fix 1c: multiple marker comments stop for human review instead
+# of claiming exactly one.
+def test_multiple_marker_comments_needs_human(tmp_path):
+    cfg = make_cfg(tmp_path)
+    gh = FakeGitHub(CANDIDATES)
+    for _ in range(2):
+        gh.create_comment(1, "[orville:DUPM-1] duplicate marker comment")
+    _seed_state(tmp_path, "DUPM-1", HARBOR_REPORT, cfg,
+                github={"issue_number": 1, "anchor": "existing", "pending": "comment"})
+    cl = fresh_clients(github=gh)
+    r = run("DUPM-1", HARBOR_REPORT, cfg, clients=cl, planner=StubPlanner("normal"))
+    assert r["status"] == "needs_human", r
+    assert "multiple" in r["reason"].lower() or "duplicate" in r["reason"].lower()
+    assert len(gh.comments[1]) == 2, "no third comment may be written"
+    assert len(cl["trello"].cards) == 0
+
+
+# Final-review fix 2a (client level): 5xx is ambiguous, 4xx is a definitive
+# rejection, both are distinct from success.
+def test_discord_http_classification():
+    from unittest.mock import patch
+    import httpx
+    from orville.discord_client import DiscordClient
+
+    class StubResponse:
+        def __init__(self, status):
+            self.status_code = status
+            self.text = "stub"
+        def json(self):
+            return {"id": "m1", "channel_id": "c1"}
+
+    class StubHttpClient:
+        status = 200
+        raise_timeout = False
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+        def post(self, *args, **kwargs):
+            if StubHttpClient.raise_timeout:
+                raise httpx.ConnectTimeout("timed out")
+            return StubResponse(StubHttpClient.status)
+
+    def outcome_for(status=None, timeout=False):
+        StubHttpClient.status = status
+        StubHttpClient.raise_timeout = timeout
+        with patch("orville.discord_client.httpx.Client", lambda **kw: StubHttpClient()):
+            return DiscordClient("https://discord.test/webhook").post_message("test")
+
+    assert outcome_for(200).status == "posted"
+    assert outcome_for(403).status == "failed", "definitive rejection stays retryable-failed"
+    assert outcome_for(500).status == "uncertain", "5xx must not claim no message was created"
+    assert outcome_for(503).status == "uncertain"
+    assert outcome_for(timeout=True).status == "uncertain"
+
+
+# Final-review fix 2b (runner level): an ambiguous 5xx send persists
+# uncertainty and is never auto-reposted.
+def test_discord_server_error_runner_persists_uncertain(tmp_path):
+    cfg = make_cfg(tmp_path)
+    dcl = FakeDiscord()
+    dcl.mode = "server_error"
+    cl = fresh_clients(discord=dcl)
+    r1 = run("SRV-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r1["status"] == "partial", r1
+    assert len(dcl.messages) == 0
+    from orville.state import RunState
+    assert RunState(cfg.state_dir).get("SRV-1")["discord_uncertain"] is True
+
+    dcl.mode = "ok"
+    r2 = run("SRV-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r2["status"] == "partial", "server-error ambiguity must block the repost"
+    assert len(dcl.messages) == 0, "no automatic repost after an ambiguous server failure"
+
+
+# Final-review fix 3a: a report_id is bound to one immutable report.
+def test_changed_report_same_id_rejected_before_writes(tmp_path):
+    cfg = make_cfg(tmp_path)
+    cl = fresh_clients()
+    r1 = run("BIND-1", HARBOR_REPORT, cfg, clients=cl, planner=StubPlanner("normal"))
+    assert r1["status"] == "complete"
+    counts = (len(cl["github"].comments[1]), len(cl["trello"].cards), len(cl["discord"].messages))
+
+    r2 = run("BIND-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r2["status"] == "needs_human", r2
+    assert "report text differs" in r2["reason"]
+    assert (len(cl["github"].comments[1]), len(cl["trello"].cards), len(cl["discord"].messages)) == counts, \
+        "conflicting input must be rejected before any app write"
+
+
+# Final-review fix 3b: destination scope is part of the binding.
+def test_changed_destination_same_id_rejected(tmp_path):
+    cfg = make_cfg(tmp_path)
+    cl = fresh_clients()
+    r1 = run("BIND-2", HARBOR_REPORT, cfg, clients=cl, planner=StubPlanner("normal"))
+    assert r1["status"] == "complete"
+    cards_before = len(cl["trello"].cards)
+
+    cfg2 = replace(cfg, trello_list_id="some-other-list")
+    r2 = run("BIND-2", HARBOR_REPORT, cfg2, clients=cl, planner=StubPlanner("normal"))
+    assert r2["status"] == "needs_human", r2
+    assert "Trello list" in r2["reason"]
+    assert len(cl["trello"].cards) == cards_before, "no card may be written to the other list"
+
+
+# Final-review fix 3c: legacy entries migrate only after the recorded content
+# verifies the submitted text; verified migration preserves the demo state.
+def test_legacy_state_migrates_with_verification(tmp_path):
+    cfg = make_cfg(tmp_path)
+    gh = FakeGitHub(CANDIDATES)
+    body = f"[orville:LEG-1]\n\nCustomer report `LEG-1` handed off to engineering.\n\n---\n\n{HARBOR_REPORT}"
+    created = gh.create_comment(1, body)
+    _seed_state(tmp_path, "LEG-1", HARBOR_REPORT, cfg,
+                github={"issue_number": 1, "comment_id": created["id"],
+                        "html_url": created["html_url"]},
+                include_binding=False)
+    cl = fresh_clients(github=gh)
+    r = run("LEG-1", HARBOR_REPORT, cfg, clients=cl, planner=StubPlanner("normal"))
+    assert r["status"] == "complete", r
+    assert len(gh.comments[1]) == 1, "verified legacy entry is reused, not duplicated"
+    from orville.state import RunState
+    assert RunState(cfg.state_dir).get("LEG-1")["binding"] is not None, "binding recorded after migration"
+
+
+# Final-review fix 3d: unverifiable legacy state stops for a human instead of
+# binding arbitrary new input.
+def test_legacy_state_unverifiable_needs_human(tmp_path):
+    cfg = make_cfg(tmp_path)
+    gh = FakeGitHub(CANDIDATES)
+    created = gh.create_comment(1, "[orville:LEG-2] some other report's comment")
+    _seed_state(tmp_path, "LEG-2", NEW_REPORT, cfg,
+                github={"issue_number": 1, "comment_id": created["id"],
+                        "html_url": created["html_url"]},
+                include_binding=False)
+    cl = fresh_clients(github=gh)
+    r = run("LEG-2", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("normal"))
+    assert r["status"] == "needs_human", r
+    assert "legacy" in r["reason"].lower()
+    assert len(gh.comments[1]) == 1 and len(cl["trello"].cards) == 0, "no writes before verified migration"
+
+
+# Final-review fix 4a: a model outage returns a structured, retryable result
+# with no writes and no raised exception.
+def test_planner_outage_structured_result(tmp_path):
+    cfg = make_cfg(tmp_path)
+
+    class OfflinePlanner:
+        def plan(self, candidates, report):
+            raise TimeoutError("model unavailable")
+
+    cl = fresh_clients()
+    r = run("OFFLINE-1", HARBOR_REPORT, cfg, clients=cl, planner=OfflinePlanner())
+    assert r["status"] == "partial", r
+    assert any("retryable" in e for e in r["errors"])
+    assert r["apps"]["github"]["verified"] is False
+    assert len(cl["trello"].cards) == 0 and len(cl["discord"].messages) == 0
+
+
+# Final-review fix 4b: candidate-fetch failure is structured and write-free.
+def test_candidate_fetch_failure_structured(tmp_path):
+    cfg = make_cfg(tmp_path)
+    gh = FakeGitHub(CANDIDATES, fail_list_issues=True)
+    cl = fresh_clients(github=gh)
+    r = run("FETCH-1", HARBOR_REPORT, cfg, clients=cl, planner=StubPlanner("normal"))
+    assert r["status"] == "partial", r
+    assert any("candidate fetch failed" in e for e in r["errors"])
+    assert len(gh.comments[1]) == 0 and len(cl["trello"].cards) == 0
+
+
+# Final-review fix 4c: a malformed model response is caught at the Python
+# boundary and reported without writes.
+def test_malformed_model_response_structured(tmp_path):
+    cfg = make_cfg(tmp_path)
+
+    class BadPlanner:
+        def plan(self, candidates, report):
+            return "this is not a plan object"
+
+    cl = fresh_clients()
+    r = run("BADPLAN-1", HARBOR_REPORT, cfg, clients=cl, planner=BadPlanner())
+    assert r["status"] == "partial", r
+    assert any("model call or response failed" in e for e in r["errors"])
+    assert len(cl["trello"].cards) == 0 and len(cl["discord"].messages) == 0
 
 
 # Regression (second pass 2): a reused Discord message missing the verified

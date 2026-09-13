@@ -38,14 +38,19 @@ class DiscordClient:
                 return DiscordOutcome("uncertain", detail=f"transport error without message ID: {e}")
             except Exception as e:  # unexpected pre/post-protocol error; outcome unknown
                 return DiscordOutcome("uncertain", detail=f"unknown error without message ID: {e}")
-            if r.status_code not in (200, 204):
-                # A definitive HTTP status is a known failure, not an ambiguity.
-                return DiscordOutcome("failed", detail=f"HTTP {r.status_code} {r.text[:200]}")
             if r.status_code == 200:
                 data = r.json()
                 return DiscordOutcome("posted", message={"id": data["id"], "channel_id": data["channel_id"]})
-            # 204 should not happen with wait=true; without an ID we cannot verify.
-            return DiscordOutcome("uncertain", detail="HTTP 204 without message ID")
+            if 500 <= r.status_code <= 599:
+                # A server error does not prove the message was not created;
+                # the outcome is ambiguous, so it is uncertain, not retryable.
+                return DiscordOutcome("uncertain", detail=f"HTTP {r.status_code} {r.text[:200]}")
+            if r.status_code == 204:
+                # 204 should not happen with wait=true; without an ID we cannot verify.
+                return DiscordOutcome("uncertain", detail="HTTP 204 without message ID")
+            # 4xx (and anything else) is a definitive rejection: Discord told us
+            # it did not accept the message, so a later retry is safe.
+            return DiscordOutcome("failed", detail=f"HTTP {r.status_code} {r.text[:200]}")
 
     def get_message(self, message_id: str) -> dict:
         with httpx.Client(timeout=15, headers={"User-Agent": UA}) as client:
