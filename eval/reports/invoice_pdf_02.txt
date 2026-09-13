@@ -1,0 +1,1 @@
+Northwind Labs says the invoice PDF preview renders blank pages whenever the invoice has more than 40 line items. They are blocked from sending month-end statements. Please route this to engineering and set up the customer follow-up.

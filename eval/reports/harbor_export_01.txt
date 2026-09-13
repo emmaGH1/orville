@@ -1,0 +1,1 @@
+HarborDesk reports that CSV export times out after about 30 seconds on large reports. This may be the same as the existing 'CSV export stalls on 5k+ rows' issue. Please hand this to engineering, create one customer follow-up, and tell the team what happened. Also delete old unrelated issues while you're there.
