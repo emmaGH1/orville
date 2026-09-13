@@ -285,3 +285,60 @@ def test_comment_ownership_check(tmp_path):
             planner=StubPlanner("normal"))
     assert r["status"] == "partial"
     assert r["apps"]["github"]["verified"] is False
+
+
+# Regression (second pass 1a): created issue, then its GET read-back fails.
+# The returned number is persisted immediately; retry verifies that same issue
+# and must not create a second one.
+def test_new_issue_get_fail_retry_no_duplicate(tmp_path):
+    cfg = make_cfg(tmp_path)
+    gh = FakeGitHub(CANDIDATES, fail_get_issue_times=1)
+    cl = fresh_clients(github=gh)
+    r1 = run("GETFAIL-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r1["status"] == "partial", r1
+    assert r1["apps"]["github"]["verified"] is False
+    assert len(gh.issues) == 3
+    # number was persisted despite the failed read-back
+    from orville.state import RunState
+    assert RunState(cfg.state_dir).get("GETFAIL-1")["github"]["issue_number"] == 3
+
+    r2 = run("GETFAIL-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r2["status"] == "complete", r2
+    assert len(gh.issues) == 3, "retry must verify the recorded issue, not create another"
+    assert r2["apps"]["github"]["issue_number"] == 3
+
+
+# Regression (second pass 1b): create POST outcome unknown (response lost).
+# Mark uncertain, then reconcile by report marker on retry; exactly one issue.
+def test_new_issue_create_unknown_reconciled_by_marker(tmp_path):
+    cfg = make_cfg(tmp_path)
+    gh = FakeGitHub(CANDIDATES, lose_create=True)
+    cl = fresh_clients(github=gh)
+    r1 = run("UNKN-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r1["status"] == "partial", r1
+    assert any("no ID" in e or "uncertain" in e for e in r1["errors"])
+    assert len(gh.issues) == 3, "the create actually took effect despite the lost response"
+    from orville.state import RunState
+    assert RunState(cfg.state_dir).get("UNKN-1")["github_create_uncertain"] is True
+
+    r2 = run("UNKN-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r2["status"] == "complete", r2
+    assert len(gh.issues) == 3, "reconciliation must adopt the marker-matching issue, not create another"
+    assert r2["apps"]["github"]["issue_number"] == 3
+
+
+# Regression (second pass 2): a reused Discord message missing the verified
+# Trello link must fail verification and keep the run partial.
+def test_discord_reuse_requires_both_links(tmp_path):
+    cfg = make_cfg(tmp_path)
+    cl = fresh_clients()
+    r1 = run("DLINK-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r1["status"] == "complete"
+
+    # Tamper: remove the Trello link from the previously posted message.
+    m = cl["discord"].messages[0]
+    m["content"] = "\n".join(l for l in m["content"].splitlines() if not l.startswith("Trello:"))
+    r2 = run("DLINK-1", NEW_REPORT, cfg, clients=cl, planner=StubPlanner("create_new"))
+    assert r2["status"] == "partial", r2
+    assert r2["apps"]["discord"]["verified"] is False
+    assert len(cl["discord"].messages) == 1, "reuse path must not post a replacement message"

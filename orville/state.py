@@ -17,6 +17,7 @@ def _empty() -> dict:
         "trello": {},       # card_id, url
         "discord": {},      # message_id, channel_id
         "discord_uncertain": False,
+        "github_create_uncertain": False,
         "status": "incomplete",
         "updated_at": None,
     }
@@ -41,6 +42,8 @@ class RunState:
                 entry[key].update(apps[key])
         if "discord_uncertain" in apps:
             entry["discord_uncertain"] = apps["discord_uncertain"]
+        if "github_create_uncertain" in apps:
+            entry["github_create_uncertain"] = apps["github_create_uncertain"]
         if status:
             entry["status"] = status
         entry["updated_at"] = datetime.now(timezone.utc).isoformat()

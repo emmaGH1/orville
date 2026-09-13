@@ -9,13 +9,16 @@ from orville.discord_client import DiscordOutcome
 
 class FakeGitHub:
     def __init__(self, issues: dict[int, str], fail_list_comments: bool = False,
-                 fail_get_issue: bool = False) -> None:
+                 fail_get_issue: bool = False, fail_get_issue_times: int = 0,
+                 lose_create: bool = False) -> None:
         self._next = 1000  # comment ids
         self.issues = {n: {"title": t, "body": "", "html_url": f"https://github.test/issue/{n}"} for n, t in issues.items()}
         self.comments: dict[int, list[dict]] = {n: [] for n in self.issues}
         self.deleted: list = []
         self.fail_list_comments = fail_list_comments
         self.fail_get_issue = fail_get_issue
+        self.fail_get_issue_times = fail_get_issue_times
+        self.lose_create = lose_create
 
     def list_open_issues(self, per_page: int = 20) -> list[dict]:
         return [{"number": n, "title": d["title"], "body": d["body"], "html_url": d["html_url"]}
@@ -42,11 +45,17 @@ class FakeGitHub:
         n = max(self.issues, default=0) + 1
         self.issues[n] = {"title": title, "body": body, "html_url": f"https://github.test/issue/{n}"}
         self.comments[n] = []
+        if self.lose_create:
+            # Simulate the issue being created but the POST response being lost.
+            raise ConnectionError("connection reset after GitHub accepted the create")
         return {"number": n, "id": n * 10, "html_url": f"https://github.test/issue/{n}"}
 
     def get_issue(self, issue_number: int) -> dict:
         if self.fail_get_issue:
             raise RuntimeError("simulated github outage on issue read")
+        if self.fail_get_issue_times > 0:
+            self.fail_get_issue_times -= 1
+            raise RuntimeError("simulated github outage on first issue read")
         if issue_number not in self.issues:
             raise RuntimeError(f"issue {issue_number} not found")
         d = self.issues[issue_number]

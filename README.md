@@ -6,13 +6,14 @@ The distinctive part is the guarding: the model may only choose among issue IDs 
 
 ## Try it as a judge
 
-The repository is currently private; request access to `emmaGH1/orville` from the repository owner before judging. Then:
+The repository is currently private; request access to `emmaGH1/orville` from the repository owner before judging. Note that repository access alone does **not** grant access to the maintainer's private Trello board or Discord channel — you will see the maintainer's real three-app states in the submitted two-minute recording, and you can verify every claim yourself end-to-end by running Orville against your own test accounts:
 
-1. **Prerequisites:** Python 3.11+, Git. Orville writes to the maintainer's GitHub test repository, Trello board, and Discord channel using the maintainer's credentials, so judges can run it read-only by following the verification steps below, or do a full run with their own credentials (step 3).
+1. **Prerequisites:** Python 3.11+, Git, and your own GitHub test repository, Trello board/list, Discord test channel, and Groq account (all have free tiers).
 
-2. **Setup (full run with your own apps):**
+2. **Setup:**
    ```bash
-   git clone <this repository> && cd multi-app-agent-hackathon-2026
+   git clone https://github.com/emmaGH1/orville.git
+   cd orville
    python -m venv .venv
    .venv\Scripts\pip install -r requirements.txt      # POSIX: .venv/bin/pip ...
    copy .env.example .env                              # POSIX: cp .env.example .env
@@ -29,7 +30,7 @@ The repository is currently private; request access to `emmaGH1/orville` from th
 
 5. **Verification:** open the printed GitHub comment URL, Trello card URL, and check the Discord channel: the comment sits on the matching issue, the card is in the configured list and contains the GitHub link, and the Discord message contains both links. Then re-run the exact same command: the output reuses the same three IDs (`reused comment/card/message`) and creates nothing new.
 
-6. **Failure behavior (tested):** an ambiguous match stops as `"needs_human"` before any write; a failed duplicate-check read blocks the write (`partial` with a retryable reason); a Discord send whose outcome is unknown is marked `uncertain` and is never reposted automatically; re-running a completed report creates no duplicates. All of these are covered by `python -m pytest tests/ -q` (16 tests, local fakes only).
+6. **Failure behavior (tested):** an ambiguous match stops as `"needs_human"` before any write; a failed duplicate-check read blocks the write (`partial` with a retryable reason); a Discord send whose outcome is unknown is marked `uncertain` and is never reposted automatically; a retry after an interrupted GitHub issue creation verifies the recorded issue instead of creating another; re-running a completed report creates no duplicates. All of these are covered by `python -m pytest tests/ -q` (19 tests, local fakes only).
 
 ## How it works
 
@@ -39,10 +40,10 @@ The repository is currently private; request access to `emmaGH1/orville` from th
 
 ## Reliability and limitations (honest)
 
-- **Verified:** one live end-to-end run per path (route-to-existing-issue and create-new-issue) returned `complete` with three independently read-back records; a re-run reused all three records. 16 tests pass locally using in-memory fakes for failure paths (duplicate-check failure, trello outage retry, lost Discord response, unreadable new issue, ambiguity, refusal, redaction).
+- **Verified:** one live end-to-end run per path (route-to-existing-issue and create-new-issue) returned `complete` with three independently read-back records; a re-run reused all three records. 19 tests pass locally using in-memory fakes for failure paths (duplicate-check failure, trello outage retry, lost Discord response, unreadable new issue, interrupted issue creation with lost response, ambiguity, refusal, redaction).
 - **Simulation:** the failure-path tests use stateful fakes, not the real apps. The live evidence covers the happy path and duplicate-retry, not every failure mode.
 - **Known limits:** GitHub candidate and comment searches are bounded (first 20 open issues; first 50 comments per issue) with no pagination — reports beyond that are not matched. Duplicate recovery for GitHub/Trello relies on app-side markers plus local state; if local state is lost and the app search also fails, Orville fails closed rather than risk a duplicate. A Discord send whose outcome is unknown is never retried automatically — it stays `uncertain` until a human reconciles; exactly-once Discord delivery cannot be guaranteed after local state loss. Marker checks assume no one edits Orville's records between runs.
-- The judge demo records show the maintainer's configured apps; all sample data is fictional and labeled in the repositories.
+- The submitted two-minute recording shows the maintainer's real app states (private GitHub repository, Trello board, Discord channel); it is not a simulation. All sample data is fictional and labeled in the repositories. Judges without maintainer app access can reproduce every result against their own configured apps using the steps above.
 
 ## Credits
 

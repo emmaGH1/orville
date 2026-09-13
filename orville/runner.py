@@ -123,7 +123,36 @@ def run(
             fail("github", f"github reuse read-back failed (retryable): {e}")
     else:
         issue_number = prior_gh.get("issue_number")
-        if issue_number is None:
+        issue_from_prior = issue_number is not None
+        issue_create_uncertain = bool(prior.get("github_create_uncertain"))
+        if issue_number is None and issue_create_uncertain:
+            # A create POST returned no ID, so whether the issue exists is
+            # unknown. Reconcile by the report marker before any new create.
+            try:
+                candidates = clients["github"].list_open_issues()
+                matches = [c["number"] for c in candidates if marker in (c.get("body") or "")]
+            except Exception as e:
+                matches = None
+                trace.outcome("github_reconcile", cfg.github_repo, False, str(e))
+                fail("github", f"github reconciliation search failed; create withheld (retryable): {e}")
+                apps["github"] = {"verified": False}
+            if matches is not None:
+                if len(matches) == 1:
+                    issue_number = matches[0]
+                    issue_from_prior = True
+                    state.update(report_id, github={"issue_number": issue_number},
+                                 github_create_uncertain=False)
+                    trace.note(f"reconciled uncertain creation to issue #{issue_number} by report marker")
+                elif len(matches) == 0:
+                    state.update(report_id, github_create_uncertain=False)
+                    trace.note("reconciliation found no marker; creation did not take; proceeding with planning")
+                else:
+                    result["status"] = "needs_human"
+                    result["reason"] = f"report marker matches multiple issues {sorted(matches)}; human review required"
+                    result["errors"] = [redact(e, secrets=_config_secrets(cfg)) for e in result["errors"]]
+                    result["trace"] = trace.rendered()
+                    return RunResult(result)
+        if issue_number is None and not bool(prior.get("github_create_uncertain")):
             candidates = clients["github"].list_open_issues()
             choice = planner.plan(candidates, report_text)
             decision: PlanDecision = validate_choice(choice, candidates)
@@ -142,28 +171,41 @@ def run(
                                                              f"{marker}\n\n{report_text}")
                 except Exception as e:
                     trace.outcome("github_create_issue", cfg.github_repo, False, str(e))
-                    fail("github", f"github issue creation failed (retryable): {e}")
+                    fail("github", f"github issue creation returned no ID; marked uncertain, reconcile on retry (retryable): {e}")
+                    state.update(report_id, github_create_uncertain=True)
                     created = None
-                if created is not None:
-                    # Independent read-back of the new issue before continuing.
-                    try:
-                        got = clients["github"].get_issue(created["number"])
-                        issue_ok = (got["number"] == created["number"] and marker in got["body"])
-                        trace.assertion("github", issue_ok,
-                                        f"new issue {got['number']} in {cfg.github_repo}")
-                        if issue_ok:
-                            issue_number = got["number"]
-                            state.update(report_id, github={"issue_number": issue_number,
-                                                            "html_url": got["html_url"]})
-                        else:
-                            fail("github", "created github issue read-back mismatch; write not verified")
-                            apps["github"] = {"verified": False}
-                    except Exception as e:
-                        trace.outcome("github_issue_readback", cfg.github_repo, False, str(e))
-                        fail("github", f"created github issue read-back failed (retryable): {e}")
-                        apps["github"] = {"verified": False}
+                if created is not None and created.get("number") is not None:
+                    # Persist the returned number immediately, unverified, so a
+                    # retry verifies this same issue instead of creating another.
+                    issue_number = created["number"]
+                    issue_from_prior = True
+                    state.update(report_id, github={"issue_number": issue_number,
+                                                    "html_url": created.get("html_url")})
+                elif created is not None:
+                    trace.outcome("github_create_issue", cfg.github_repo, False, "response without issue number")
+                    fail("github", "github issue creation returned no ID; marked uncertain, reconcile on retry (retryable)")
+                    state.update(report_id, github_create_uncertain=True)
             else:
                 issue_number = decision.issue_number
+
+        if issue_number is not None and not apps.get("github", {}).get("verified", False):
+            if issue_from_prior:
+                # The issue number was recorded, not just returned: verify this
+                # exact issue before any new POST against it.
+                try:
+                    got = clients["github"].get_issue(issue_number)
+                    issue_ok = (got["number"] == issue_number and marker in got["body"])
+                    trace.assertion("github", issue_ok,
+                                    f"recorded issue #{issue_number} in {cfg.github_repo} carries the report marker")
+                    if not issue_ok:
+                        fail("github", f"recorded issue #{issue_number} read-back mismatch; no write until verified")
+                        apps["github"] = {"verified": False, "issue_number": issue_number}
+                        issue_number = None
+                except Exception as e:
+                    trace.outcome("github_issue_readback", cfg.github_repo, False, str(e))
+                    fail("github", f"recorded issue #{issue_number} read-back failed; no write until verified (retryable): {e}")
+                    apps["github"] = {"verified": False, "issue_number": issue_number}
+                    issue_number = None
 
         if issue_number is not None and not apps.get("github", {}).get("verified", False):
             target = issue_number
@@ -283,12 +325,15 @@ def run(
         trace.note(f"retry: reusing recorded discord message {message_id}")
         try:
             got = clients["discord"].get_message(message_id)
-            dc_ver = (got["id"] == message_id and marker in got["content"]
-                      and not (gh_url and gh_url not in got["content"]))
-            trace.assertion("discord", dc_ver, f"reused message {message_id}")
+            # Same proof as a fresh send: marker plus both verified links.
+            tr_url = prior["trello"].get("url") or apps.get("trello", {}).get("url")
+            links_ok = (bool(gh_url) and gh_url in got["content"]
+                        and bool(tr_url) and tr_url in got["content"])
+            dc_ver = (got["id"] == message_id and marker in got["content"] and links_ok)
+            trace.assertion("discord", dc_ver, f"reused message {message_id} with marker and both verified links")
             apps["discord"] = {"id": message_id, "verified": dc_ver}
             if not dc_ver:
-                result["errors"].append("discord read-back of recorded message failed marker or link check")
+                result["errors"].append("discord read-back of recorded message failed marker or verified-link check")
         except Exception as e:
             trace.outcome("discord_reuse", "webhook", False, str(e))
             fail("discord", f"discord reuse read-back failed (retryable): {e}")
