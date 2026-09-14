@@ -384,18 +384,26 @@ action: "HALT EXECUTION — ZERO WRITES"
           3.5
         );
 
-        // Operator selects candidate #2 at 11s — Snappy button press
+        // Operator selects candidate #2 at 11s — Snappy button press & frame minimize on unselected
         tl.to("#btn-opt2", { scale: 0.92, duration: 0.12, ease: "power2.in" }, 11.0)
           .set("#btn-opt2", { textContent: "CLICKED ✓", background: "#99E885" }, 11.15)
           .to("#btn-opt2", { scale: 1.0, duration: 0.2, ease: "back.out(2)" }, 11.15)
-          .to("#opt-2", { background: "#C0F7FE", borderColor: "#000", duration: 0.3 }, 11.2)
+          .to("#opt-2", { background: "#C0F7FE", borderColor: "#000", scale: 1.02, duration: 0.3 }, 11.2)
+          .to("#opt-1", { scale: 0.94, opacity: 0.4, duration: 0.3, ease: "power2.in" }, 11.2)
           .fromTo("#resume-box", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.45, ease: "back.out(1.5)" }, 11.8)
           .to("#resume-details", { opacity: 1, duration: 0.4 }, 12.6)
           .set("#status-pill", { textContent: "STATUS: RESUMED & COMPLETE", background: "#99E885" }, 12.8)
           .set("#review-tag", { textContent: "RESOLVED", color: "#22C55E" }, 12.8);
 
-        // Exit at 24.2s
-        tl.to(".scene-container", { y: -25, opacity: 0, duration: 0.5, ease: "power2.in" }, 24.2);
+        // Exit at 24.0s — Smoothly minimize frames before scene cut
+        tl.to(".content-grid", {
+          scale: 0.88,
+          y: -25,
+          opacity: 0,
+          duration: 0.6,
+          ease: "back.in(1.3)"
+        }, 24.0)
+        .to(".scene-container", { opacity: 0, duration: 0.2 }, 24.6);
 
         window.__timelines["act3-escalation"] = tl;
       </script>

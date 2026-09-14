@@ -371,8 +371,15 @@
           }, 11.0)
           .set("#caption-4", { textContent: "42 AUTOMATED TESTS PROVE RESILIENCE UNDER NETWORK FAULTS & MALICIOUS ATTACKS" }, 10.0);
 
-        // Act 4 Exit
-        tl.to(".scene-container", { y: -25, opacity: 0, duration: 0.5, ease: "power2.in" }, 19.4);
+        // Act 4 Exit — Minimize frames before scene transition to Act 5
+        tl.to([".window-frame", ".info-panel"], {
+          scale: 0.88,
+          y: -25,
+          opacity: 0,
+          duration: 0.6,
+          ease: "back.in(1.3)"
+        }, 19.2)
+        .to(".scene-container", { opacity: 0, duration: 0.2 }, 19.8);
 
         window.__timelines["act4-retry"] = tl;
       </script>
