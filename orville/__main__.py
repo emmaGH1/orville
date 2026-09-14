@@ -37,11 +37,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="orville")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_run = sub.add_parser("run", help="run one guarded handoff")
-    p_run.add_argument("--report-id", required=True)
-    src = p_run.add_mutually_exclusive_group(required=True)
-    src.add_argument("--text-file", help="file containing the report text")
-    src.add_argument("--text", help="report text inline")
+    for command, help_text in (("run", "run the legacy guarded handoff"),
+                               ("run-strands", "run the Strands guarded handoff")):
+        p_run = sub.add_parser(command, help=help_text)
+        p_run.add_argument("--report-id", required=True)
+        src = p_run.add_mutually_exclusive_group(required=True)
+        src.add_argument("--text-file", help="file containing the report text")
+        src.add_argument("--text", help="report text inline")
 
     p_show = sub.add_parser("show", help="show persisted state for a report")
     p_show.add_argument("--report-id", required=True)
@@ -57,7 +59,20 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     text = args.text if args.text else open(args.text_file, "r", encoding="utf-8").read()
-    result = run(args.report_id, text, cfg)
+    if args.cmd == "run-strands":
+        from .discord_client import DiscordClient
+        from .github_client import GitHubClient
+        from .strands_runtime import run_strands
+        from .trello_client import TrelloClient
+
+        clients = {
+            "github": GitHubClient(cfg.github_repo, cfg.github_token),
+            "trello": TrelloClient(cfg.trello_api_key, cfg.trello_token),
+            "discord": DiscordClient(cfg.discord_webhook_url),
+        }
+        result = run_strands(args.report_id, text, cfg, clients)
+    else:
+        result = run(args.report_id, text, cfg)
     _print_result(result)
     if result["status"] == "complete":
         return 0

@@ -46,6 +46,7 @@ def _empty() -> dict:
         "discord_uncertain": False,
         "github_create_uncertain": False,
         "binding": None,    # make_binding(...) once known
+        "review": None,     # pending human decision; never an approval token
         "status": "incomplete",
         "updated_at": None,
     }
@@ -74,6 +75,8 @@ class RunState:
             entry["github_create_uncertain"] = apps["github_create_uncertain"]
         if "binding" in apps:
             entry["binding"] = apps["binding"]
+        if "review" in apps:
+            entry["review"] = apps["review"]
         if status:
             entry["status"] = status
         entry["updated_at"] = datetime.now(timezone.utc).isoformat()
