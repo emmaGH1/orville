@@ -25,3 +25,10 @@ if (statement && 'IntersectionObserver' in window && !matchMedia('(prefers-reduc
   }
   observer.observe(statement);
 }
+
+// Subtle hero entrance; reduced-motion and no-JS visitors simply see the hero.
+const hero = document.querySelector('.hero');
+if (hero && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  hero.classList.add('hero-enter');
+  requestAnimationFrame(() => requestAnimationFrame(() => hero.classList.add('hero-loaded')));
+}
