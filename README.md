@@ -22,9 +22,9 @@ The repository is currently private; request access to `emmaGH1/orville` from th
 
 3. **Action — one command, one report:**
    ```bash
-   .venv\Scripts\python -m orville run-strands --report-id HARBOR-STRANDS-04 --text-file eval/reports/harbor_strands_04.txt --only-existing-issue 1
+   .venv\Scripts\python -m orville run-strands --report-id HARBOR-STRANDS-05 --text-file eval/reports/harbor_strands_05.txt --only-existing-issue 1
    ```
-   The sample report is fictional, matches the seeded CSV-export issue, and includes an unrelated deletion request. `--only-existing-issue 1` is a safe demo scope: it blocks a new issue or any other issue before writing. The run makes three real writes to the three apps you configured.
+   The sample report is fictional, matches the seeded CSV-export issue, and includes an unrelated archive request. `--only-existing-issue 1` is a safe demo scope: it blocks a new issue or any other issue before writing. The run makes three real writes to the three apps you configured.
 
 4. **Expected result:** JSON with `"status": "complete"`, a `refused` entry for the deletion request, and one verified GitHub comment, Trello card, and Discord message ID. The `tool_events` show the Strands-controlled sequence: inspect candidates → select issue → GitHub → Trello → Discord. The trace then shows independent read-backs. A model cannot turn a prose claim into completion.
 
@@ -53,7 +53,7 @@ flowchart LR
 
 ## Reliability and limitations (honest)
 
-- **Verified:** a fresh connected Strands run for the fictional `HARBOR-STRANDS-04` report selected existing issue #1, wrote and read back one GitHub comment, Trello card, and Discord message. Its same-ID retry independently read back the same three records. 42 tests pass locally using in-memory fakes for failure paths, operation ordering, false model completion, human-choice resume (including a pre-selection `request_human_review` pause), changed input, and connected-scope blocking.
+- **Verified:** a fresh connected Strands run for the fictional `HARBOR-STRANDS-05` report selected existing issue #1, wrote and read back one GitHub comment, Trello card, and Discord message. Its same-ID retry independently read back the same three records and created nothing new. The run, its retry, and an offline human-review pause/resume case were captured as terminal output on September 14, 2026. An earlier connected proof (`HARBOR-STRANDS-04`) and its retry are also recorded. 42 tests pass locally using in-memory fakes for failure paths, operation ordering, false model completion, human-choice resume (including a pre-selection `request_human_review` pause), changed input, and connected-scope blocking.
 - **Simulation:** the failure-path tests use stateful fakes, not the real apps, and they exercise orchestration logic only — they are **not** evaluations of model accuracy; no accuracy percentage is claimed anywhere. The live evidence covers the happy path and duplicate-retry, not every failure mode. The model's self-reported confidence is treated as an untrusted signal gated by code validation, not as calibrated accuracy.
 - **Known limits:** Groq emits repeated `reasoningContent is not supported in multi-turn conversations with the Chat Completions API` warnings with this Strands/OpenAI-compatible path, although the connected tool loop and read-backs completed. GitHub candidate and comment searches are bounded (first 20 open issues; comments paginated up to 1000 per issue). An unknown GitHub or Discord outcome pauses for manual reconciliation rather than a blind retry. One `report_id` binds immutable report text and destination scope. State is a single-process local JSON file; run one report at a time.
 - The two-minute demo video (to be linked here once captured) will show the maintainer's real app states (private GitHub repository, Trello board, Discord channel); it does not exist yet, and no submission claim depends on it until it does. All sample data is fictional and labeled in the repositories. Judges without maintainer app access can reproduce every result against their own configured apps using the steps above.
