@@ -93,3 +93,21 @@ def test_ambiguous_choice_persists_review_without_app_write(tmp_path, monkeypatc
                                                cfg.discord_webhook_url)
     assert not clients["github"].comments[1]
     assert not clients["trello"].cards and not clients["discord"].messages
+
+
+def test_connected_scope_blocks_create_new_before_write(tmp_path, monkeypatch):
+    monkeypatch.setattr(runtime, "tool", lambda fn: fn)
+    monkeypatch.setattr(runtime, "Agent", ScriptedAgent)
+    ScriptedAgent.calls = [
+        "inspect_report_context",
+        ("select_issue", {"action": "create_new", "issue_number": None,
+                          "confidence": 0.95, "ambiguous": False, "reasoning": "no match"}),
+        "record_engineering_handoff",
+    ]
+    clients = fresh_clients()
+    result = runtime.run_strands("SCOPE-STRANDS-1", HARBOR_REPORT, make_cfg(tmp_path),
+                                 clients, model=object(), only_existing_issue=1)
+    assert result["status"] == "needs_human"
+    assert len(clients["github"].issues) == 2
+    assert not clients["github"].comments[1]
+    assert not clients["trello"].cards and not clients["discord"].messages

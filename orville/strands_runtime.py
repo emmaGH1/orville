@@ -25,7 +25,8 @@ Never invent IDs, links, app outcomes or completion. No delete/close/archive too
 
 def run_strands(report_id: str, report_text: str, cfg: Config, clients: dict,
                 model=None, max_tool_calls: int = 10, timeout_s: float = 90.0,
-                review_issue_number: int | None = None) -> RunResult:
+                review_issue_number: int | None = None,
+                only_existing_issue: int | None = None) -> RunResult:
     """Run one agent invocation; final status comes only from guarded tool results.
 
     `model` may be injected for offline tests. Production uses the configured
@@ -39,6 +40,12 @@ def run_strands(report_id: str, report_text: str, cfg: Config, clients: dict,
     if prior.get("binding") is not None and prior["binding"] != wanted_binding:
         return RunResult({"report_id": report_id, "status": "needs_human",
                           "reason": "report text or destination scope differs from this ID's binding",
+                          "apps": {}, "errors": [], "trace": [], "tool_events": []})
+    prior_issue = prior.get("github", {}).get("issue_number")
+    if (only_existing_issue is not None and prior_issue is not None
+            and (prior_issue != only_existing_issue or prior["github"].get("anchor") == "created")):
+        return RunResult({"report_id": report_id, "status": "needs_human",
+                          "reason": "persisted GitHub anchor conflicts with connected-run issue scope",
                           "apps": {}, "errors": [], "trace": [], "tool_events": []})
     ops = GuardedOperations(report_id, report_text, cfg, clients)
     events: list[dict] = []
@@ -67,6 +74,11 @@ def run_strands(report_id: str, report_text: str, cfg: Config, clients: dict,
         selected = PlanChoice("existing", review_issue_number, 1.0, False, "human selected")
         events.append({"tool": "operator_selection", "status": "validated",
                        "issue_number": review_issue_number})
+    if (only_existing_issue is not None and review_issue_number is not None
+            and review_issue_number != only_existing_issue):
+        return RunResult({"report_id": report_id, "status": "needs_human",
+                          "reason": "operator choice conflicts with connected-run issue scope",
+                          "apps": {}, "errors": [], "trace": [], "tool_events": []})
 
     def pause(reason: str, kind: str = "manual_reconcile") -> None:
         nonlocal review_reason
@@ -123,6 +135,12 @@ def run_strands(report_id: str, report_text: str, cfg: Config, clients: dict,
             return {"status": "blocked", "reason": "inspect candidates first"}
         choice = PlanChoice(action, issue_number, confidence, ambiguous, reasoning)
         decision = validate_choice(choice, candidates)
+        if (only_existing_issue is not None and decision.decision != "needs_human"
+                and (decision.decision != "existing" or decision.issue_number != only_existing_issue)):
+            pause(f"connected run is limited to existing issue #{only_existing_issue}",
+                  kind="manual_reconcile")
+            events.append({"tool": "select_issue", "status": "scope_blocked"})
+            return {"status": "needs_human", "reason": review_reason}
         if decision.decision == "needs_human":
             pause(decision.reason, kind="candidate_choice")
             events.append({"tool": "select_issue", "status": "needs_human"})

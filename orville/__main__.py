@@ -45,6 +45,9 @@ def main(argv: list[str] | None = None) -> int:
         if command == "resume-strands":
             p_run.add_argument("--issue-number", required=True, type=int,
                                help="operator-selected issue number from the recorded review options")
+        if command in ("run-strands", "resume-strands"):
+            p_run.add_argument("--only-existing-issue", type=int,
+                               help="block all new issue creation or routing to another issue")
         src = p_run.add_mutually_exclusive_group(required=True)
         src.add_argument("--text-file", help="file containing the report text")
         src.add_argument("--text", help="report text inline")
@@ -75,7 +78,8 @@ def main(argv: list[str] | None = None) -> int:
             "discord": DiscordClient(cfg.discord_webhook_url),
         }
         result = run_strands(args.report_id, text, cfg, clients,
-                             review_issue_number=args.issue_number if args.cmd == "resume-strands" else None)
+                             review_issue_number=args.issue_number if args.cmd == "resume-strands" else None,
+                             only_existing_issue=args.only_existing_issue)
     else:
         result = run(args.report_id, text, cfg)
     _print_result(result)
