@@ -19,6 +19,7 @@ service-account*.json
 # Generated output
 node_modules/
 .venv/
+.strands-venv/
 venv/
 __pycache__/
 .next/
