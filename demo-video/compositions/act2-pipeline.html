@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @font-face {
+          font-family: "Space Grotesk";
+          src: local("Space Grotesk"), local("Segoe UI Semibold"), local("Consolas");
+        }
+        @font-face {
+          font-family: "Inter";
+          src: local("Inter"), local("Segoe UI"), local("Arial");
+        }
+
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          background: #C0F7FE;
+          color: #000000;
+          font-family: "Inter", sans-serif;
+          overflow: hidden;
+          box-sizing: border-box;
+        }
+
+        .dotgrid {
+          position: absolute;
+          inset: 0;
+          opacity: 0.25;
+          background-image: radial-gradient(circle, #000 1.5px, transparent 1.5px);
+          background-size: 28px 28px;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .scene-container {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          padding: 36px 60px;
+          z-index: 5;
+        }
+
+        .header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .title-block h2 {
+          font-size: 44px;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: -0.03em;
+          line-height: 1;
+        }
+
+        .pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          border: 3px solid #000;
+          background: #FFFFFF;
+          box-shadow: 4px 4px 0 #000;
+          padding: 6px 18px;
+          border-radius: 9999px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          font-size: 14px;
+        }
+
+        .pill-pink { background: #FE90E8; }
+        .pill-yellow { background: #F7CB46; }
+        .pill-green { background: #99E885; }
+
+        .stage-box {
+          position: relative;
+          flex: 1;
+          display: flex;
+          gap: 30px;
+          align-items: stretch;
+          min-height: 0;
+        }
+
+        .window-frame {
+          border: 4px solid #000;
+          background: #000;
+          box-shadow: 8px 8px 0 #000;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          flex: 1.4;
+          position: relative;
+        }
+
+        .window-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 18px;
+          background: #18181B;
+          color: #FFF;
+          border-bottom: 3px solid #000;
+          font-family: "Space Grotesk", monospace;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+        }
+
+        .window-dots {
+          display: flex;
+          gap: 7px;
+        }
+
+        .dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          border: 1.5px solid #000;
+        }
+
+        .video-box {
+          position: relative;
+          width: 100%;
+          flex: 1;
+          background: #111;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .video-box video {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .info-panel {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .card-elevated {
+          border: 4px solid #000;
+          background: #FFFFFF;
+          box-shadow: 8px 8px 0 #000;
+          padding: 22px;
+          position: relative;
+        }
+
+        .card-title {
+          font-family: "Inter", sans-serif;
+          font-weight: 900;
+          text-transform: uppercase;
+          font-size: 20px;
+          letter-spacing: -0.02em;
+          margin-bottom: 10px;
+        }
+
+        .card-body {
+          font-family: "Space Grotesk", monospace;
+          font-size: 14px;
+          line-height: 1.5;
+          color: #222;
+        }
+
+        .code-block {
+          background: #18181B;
+          color: #4ADE80;
+          padding: 12px;
+          border: 2px solid #000;
+          font-family: "Space Grotesk", monospace;
+          font-size: 13px;
+          line-height: 1.4;
+          margin-top: 10px;
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+
+        .badge-stamp {
+          position: absolute;
+          border: 4px solid #000;
+          box-shadow: 6px 6px 0 #000;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          padding: 10px 18px;
+          font-size: 18px;
+          z-index: 10;
+        }
+
+        .stamp-refused {
+          top: 30px;
+          right: 30px;
+          background: #FE90E8;
+          color: #000;
+          transform: rotate(-4deg);
+        }
+
+        .stamp-matched {
+          top: 100px;
+          right: 30px;
+          background: #F7CB46;
+          color: #000;
+          transform: rotate(3deg);
+        }
+
+        .stamp-complete {
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-3deg);
+          background: #F7CB46;
+          font-size: 32px;
+          padding: 16px 36px;
+          box-shadow: 10px 10px 0 #000;
+        }
+
+        .check-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          margin-top: 10px;
+        }
+
+        .check-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          border: 2px solid #000;
+          background: #99E885;
+          padding: 8px 14px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 700;
+          font-size: 13px;
+          box-shadow: 3px 3px 0 #000;
+        }
+
+        .caption-bar {
+          margin-top: 18px;
+          background: #000;
+          color: #FFF;
+          border: 3px solid #FFF;
+          box-shadow: 6px 6px 0 #F7CB46;
+          padding: 12px 28px;
+          font-weight: 800;
+          font-size: 20px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          width: fit-content;
+          align-self: center;
+        }
+      </style>
+
+      <div id="root" data-composition-id="act2-pipeline" data-width="1920" data-height="1080">
+        <div class="dotgrid"></div>
+
+        <div class="scene-container">
+          <!-- Header -->
+          <div class="header-row">
+            <div class="title-block">
+              <div id="act2-pill" class="pill pill-pink">ACT II · GUARDED EXECUTION</div>
+              <h2 id="act2-title">STRANDS AGENT TOOL WORKFLOW</h2>
+            </div>
+            <div id="step-pill" class="pill pill-yellow">STEP 1: TERMINAL RUN</div>
+          </div>
+
+          <!-- Main Stage Box -->
+          <div class="stage-box">
+            <!-- Left: Video Window Frame -->
+            <div class="window-frame">
+              <div class="window-header">
+                <div class="window-dots">
+                  <div class="dot" style="background: #FF5F56;"></div>
+                  <div class="dot" style="background: #FFBD2E;"></div>
+                  <div class="dot" style="background: #27C93F;"></div>
+                </div>
+                <span id="video-title">ORVILLE RUN-STRANDS TERMINAL</span>
+                <span id="video-tag" style="color: #4ADE80;">LIVE CONNECTED PROOF</span>
+              </div>
+              <div class="video-box">
+                <!-- Videos with native HyperFrames timing -->
+                <video
+                  id="vid-fresh"
+                  src="assets/video/02-fresh-run.mp4"
+                  data-start="0"
+                  data-duration="22"
+                  data-hf-media-start-basis="local"
+                  muted
+                  playsinline
+                  style="position: absolute; inset: 0;"
+                ></video>
+                <video
+                  id="vid-github"
+                  src="assets/video/03-github.mp4"
+                  data-start="22"
+                  data-duration="13"
+                  data-hf-media-start-basis="local"
+                  muted
+                  playsinline
+                  style="position: absolute; inset: 0;"
+                ></video>
+                <video
+                  id="vid-trello"
+                  src="assets/video/04-trello.mp4"
+                  data-start="35"
+                  data-duration="12"
+                  data-hf-media-start-basis="local"
+                  muted
+                  playsinline
+                  style="position: absolute; inset: 0;"
+                ></video>
+                <video
+                  id="vid-discord"
+                  src="assets/video/05-discord.mp4"
+                  data-start="47"
+                  data-duration="13"
+                  data-hf-media-start-basis="local"
+                  muted
+                  playsinline
+                  style="position: absolute; inset: 0;"
+                ></video>
+
+                <!-- Badges over video -->
+                <div id="badge-refused" class="badge-stamp stamp-refused" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
+                  🛑 SAFETY: DELETION REFUSED
+                </div>
+                <div id="badge-matched" class="badge-stamp stamp-matched" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
+                  🔍 ISSUE #1 MATCHED (0.98 CONFIDENCE)
+                </div>
+                <div id="badge-complete" class="badge-stamp stamp-complete" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
+                  🏆 STATUS: COMPLETE (3/3 APPS VERIFIED)
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Dynamic Info Panel -->
+            <div class="info-panel">
+              <!-- Card 1: Tool Dispatch -->
+              <div id="card-action" class="card-elevated">
+                <div id="action-title" class="card-title">GUARDED TOOL LOOP</div>
+                <div id="action-desc" class="card-body">
+                  Strands Agent loop evaluates input, calls candidate search, matches existing issue #1, and refuses the malicious deletion request.
+                </div>
+                <div id="action-code" class="code-block">
+tools: [inspect_report, search_issues]
+refused: ["delete_closed_tickets"]
+confidence: 0.98 -> Issue #1 matched
+                </div>
+              </div>
+
+              <!-- Card 2: Readback Receipts -->
+              <div id="card-receipts" class="card-elevated">
+                <div class="card-title">INDEPENDENT GET READBACKS</div>
+                <div class="card-body">
+                  Agent does NOT trust the LLM summary. Independent HTTP GET requests verify each record directly from external APIs:
+                </div>
+                <div class="check-grid">
+                  <div id="chk-gh" class="check-item" style="opacity: 0.35;">
+                    <span>✓</span> <span>GITHUB COMMENT #5661232219 (200 OK)</span>
+                  </div>
+                  <div id="chk-tr" class="check-item" style="opacity: 0.35;">
+                    <span>✓</span> <span>TRELLO CARD #Tep5Jilu (200 OK)</span>
+                  </div>
+                  <div id="chk-dc" class="check-item" style="opacity: 0.35;">
+                    <span>✓</span> <span>DISCORD MSG #1548975043332284516 (200 OK)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Caption Bar -->
+          <div id="caption-bar-2" class="caption-bar">
+            STRANDS AGENT EXECUTES GUARDED WORKFLOW AND REFUSES PROMPT INJECTION
+          </div>
+        </div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true });
+
+        // Phase 1: Terminal Execution (0s - 22s)
+        tl.from(".window-frame", { scale: 0.92, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.2)
+          .from(".info-panel", { x: 50, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.4);
+
+        // Deletion Refusal badge pops in at 4s
+        tl.fromTo("#badge-refused", 
+          { scale: 0, opacity: 0, rotation: -20 }, 
+          { scale: 1, opacity: 1, rotation: -4, duration: 0.6, ease: "back.out(2)" }, 
+          4.0
+        );
+
+        // Candidate search matched badge at 11s
+        tl.fromTo("#badge-matched", 
+          { scale: 0, opacity: 0, rotation: 20 }, 
+          { scale: 1, opacity: 1, rotation: 3, duration: 0.6, ease: "back.out(2)" }, 
+          11.0
+        );
+
+        // Phase 2: GitHub Destination (22s - 35s)
+        tl.to(["#badge-refused", "#badge-matched"], { opacity: 0, duration: 0.4 }, 21.5)
+          .set(["#badge-refused", "#badge-matched"], { display: "none" }, 22.0)
+          .set("#step-pill", { textContent: "DESTINATION 1: GITHUB" }, 22.0)
+          .set("#video-title", { textContent: "GITHUB ISSUE #1 — REAL COMMENT POSTED" }, 22.0)
+          .set("#action-title", { textContent: "1. GITHUB COMMENT RECORDED" }, 22.0)
+          .set("#action-desc", { textContent: "Posted comment to existing Issue #1 containing the report summary and deduplication marker [orville-report-id: HARBOR-STRANDS-05]." }, 22.0)
+          .set("#action-code", { textContent: "POST /repos/emmaGH1/orville/issues/1/comments\n-> Comment ID: 5661232219\n-> Marker anchored in body" }, 22.0)
+          .to("#chk-gh", { opacity: 1, duration: 0.4, scale: 1.04 }, 24.0)
+          .to("#chk-gh", { scale: 1.0, duration: 0.2 }, 24.5)
+          .set("#caption-bar-2", { textContent: "DESTINATION 1: COMMENT ATTACHED TO GITHUB ISSUE & INDEPENDENTLY READ BACK" }, 22.0);
+
+        // Phase 3: Trello Destination (35s - 47s)
+        tl.set("#step-pill", { textContent: "DESTINATION 2: TRELLO" }, 35.0)
+          .set("#video-title", { textContent: "TRELLO BOARD — CUSTOMER FOLLOW-UP CARD" }, 35.0)
+          .set("#action-title", { textContent: "2. TRELLO CARD CREATED" }, 35.0)
+          .set("#action-desc", { textContent: "Customer follow-up card created in the specified list, embedding the verified GitHub comment URL for seamless team handoff." }, 35.0)
+          .set("#action-code", { textContent: "POST /cards\n-> Card ID: Tep5Jilu\n-> Link: github.com/emmaGH1/orville/issues/1#5661232219" }, 35.0)
+          .to("#chk-tr", { opacity: 1, duration: 0.4, scale: 1.04 }, 37.0)
+          .to("#chk-tr", { scale: 1.0, duration: 0.2 }, 37.5)
+          .set("#caption-bar-2", { textContent: "DESTINATION 2: TRELLO CARD CREATED WITH EMBEDDED GITHUB ISSUE LINK" }, 35.0);
+
+        // Phase 4: Discord Destination & Complete (47s - 60s)
+        tl.set("#step-pill", { textContent: "DESTINATION 3: DISCORD" }, 47.0)
+          .set("#video-title", { textContent: "DISCORD #ORVILLE-DEMO CHANNEL" }, 47.0)
+          .set("#action-title", { textContent: "3. DISCORD TEAM UPDATE" }, 47.0)
+          .set("#action-desc", { textContent: "Notification posted to Discord webhook with wait=true, returning message ID and linking to both GitHub and Trello records." }, 47.0)
+          .set("#action-code", { textContent: "POST /webhooks/.../?wait=true\n-> Message ID: 1548975043332284516\n-> Status: COMPLETE (All 3 readbacks verified)" }, 47.0)
+          .to("#chk-dc", { opacity: 1, duration: 0.4, scale: 1.04 }, 49.0)
+          .to("#chk-dc", { scale: 1.0, duration: 0.2 }, 49.5)
+          .fromTo("#badge-complete", 
+            { scale: 0, opacity: 0, rotation: -15 }, 
+            { scale: 1, opacity: 1, rotation: -3, duration: 0.7, ease: "elastic.out(1, 0.4)" }, 
+            51.0
+          )
+          .set("#caption-bar-2", { textContent: "ALL 3 APPS VERIFIED VIA INDEPENDENT GET READBACKS BEFORE REPORTING COMPLETE" }, 47.0);
+
+        // Act 2 Exit
+        tl.to(".scene-container", { y: -40, opacity: 0, duration: 0.7, ease: "power2.in" }, 59.2);
+
+        window.__timelines["act2-pipeline"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

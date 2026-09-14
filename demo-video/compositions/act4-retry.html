@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @font-face {
+          font-family: "Space Grotesk";
+          src: local("Space Grotesk"), local("Segoe UI Semibold"), local("Consolas");
+        }
+        @font-face {
+          font-family: "Inter";
+          src: local("Inter"), local("Segoe UI"), local("Arial");
+        }
+
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          background: #99E885;
+          color: #000000;
+          font-family: "Inter", sans-serif;
+          overflow: hidden;
+          box-sizing: border-box;
+        }
+
+        .dotgrid {
+          position: absolute;
+          inset: 0;
+          opacity: 0.25;
+          background-image: radial-gradient(circle, #000 1.5px, transparent 1.5px);
+          background-size: 28px 28px;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .scene-container {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          padding: 36px 60px;
+          z-index: 5;
+        }
+
+        .header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .title-block h2 {
+          font-size: 44px;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: -0.03em;
+        }
+
+        .pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          border: 3px solid #000;
+          background: #FFFFFF;
+          box-shadow: 4px 4px 0 #000;
+          padding: 6px 18px;
+          border-radius: 9999px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          font-size: 14px;
+        }
+
+        .pill-yellow { background: #F7CB46; }
+        .pill-blue { background: #C0F7FE; }
+
+        .stage-box {
+          position: relative;
+          flex: 1;
+          display: flex;
+          gap: 30px;
+          align-items: stretch;
+          min-height: 0;
+        }
+
+        .window-frame {
+          border: 4px solid #000;
+          background: #000;
+          box-shadow: 8px 8px 0 #000;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          flex: 1.35;
+          position: relative;
+        }
+
+        .window-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 18px;
+          background: #18181B;
+          color: #FFF;
+          border-bottom: 3px solid #000;
+          font-family: "Space Grotesk", monospace;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+        }
+
+        .window-dots {
+          display: flex;
+          gap: 7px;
+        }
+
+        .dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          border: 1.5px solid #000;
+        }
+
+        .video-box {
+          position: relative;
+          width: 100%;
+          flex: 1;
+          background: #111;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .video-box video {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .info-panel {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .card-elevated {
+          border: 4px solid #000;
+          background: #FFFFFF;
+          box-shadow: 8px 8px 0 #000;
+          padding: 22px;
+          position: relative;
+        }
+
+        .card-title {
+          font-family: "Inter", sans-serif;
+          font-weight: 900;
+          text-transform: uppercase;
+          font-size: 20px;
+          letter-spacing: -0.02em;
+          margin-bottom: 10px;
+        }
+
+        .card-body {
+          font-family: "Space Grotesk", monospace;
+          font-size: 14px;
+          line-height: 1.5;
+          color: #222;
+        }
+
+        .code-block {
+          background: #18181B;
+          color: #4ADE80;
+          padding: 12px;
+          border: 2px solid #000;
+          font-family: "Space Grotesk", monospace;
+          font-size: 13px;
+          line-height: 1.4;
+          margin-top: 10px;
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+
+        .stat-huge {
+          font-size: 64px;
+          font-weight: 900;
+          line-height: 1;
+          color: #15803D;
+          letter-spacing: -0.03em;
+        }
+
+        .badge-stamp {
+          position: absolute;
+          border: 4px solid #000;
+          box-shadow: 6px 6px 0 #000;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          padding: 10px 18px;
+          font-size: 18px;
+          z-index: 10;
+        }
+
+        .stamp-zero-dupes {
+          top: 24px;
+          right: 24px;
+          background: #F7CB46;
+          color: #000;
+          transform: rotate(-3deg);
+        }
+
+        .check-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 10px;
+        }
+
+        .check-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          border: 2px solid #000;
+          background: #C0F7FE;
+          padding: 8px 12px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 700;
+          font-size: 12px;
+          box-shadow: 3px 3px 0 #000;
+        }
+
+        .caption-bar {
+          margin-top: 18px;
+          background: #000;
+          color: #FFF;
+          border: 3px solid #FFF;
+          box-shadow: 6px 6px 0 #F7CB46;
+          padding: 12px 28px;
+          font-weight: 800;
+          font-size: 20px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          width: fit-content;
+          align-self: center;
+        }
+      </style>
+
+      <div id="root" data-composition-id="act4-retry" data-width="1920" data-height="1080">
+        <div class="dotgrid"></div>
+
+        <div class="scene-container">
+          <div class="header-row">
+            <div class="title-block">
+              <div class="pill pill-blue">ACT IV · RELIABILITY & IDEMPOTENCY</div>
+              <h2 id="act4-title">SAME-ID RETRY & TEST VERIFICATION</h2>
+            </div>
+            <div id="act4-pill" class="pill pill-yellow">TEST 1: SAME-ID RETRY</div>
+          </div>
+
+          <div class="stage-box">
+            <!-- Left: Video Window -->
+            <div class="window-frame">
+              <div class="window-header">
+                <div class="window-dots">
+                  <div class="dot" style="background: #FF5F56;"></div>
+                  <div class="dot" style="background: #FFBD2E;"></div>
+                  <div class="dot" style="background: #27C93F;"></div>
+                </div>
+                <span id="video-title">ORVILLE RETRY — SAME REPORT ID</span>
+                <span style="color: #4ADE80;">ZERO DUPLICATES</span>
+              </div>
+              <div class="video-box">
+                <video
+                  id="vid-retry"
+                  src="assets/video/06-retry.mp4"
+                  data-start="0"
+                  data-duration="15"
+                  data-hf-media-start-basis="local"
+                  muted
+                  playsinline
+                  style="position: absolute; inset: 0;"
+                ></video>
+                <video
+                  id="vid-tests"
+                  src="assets/video/07-tests.mp4"
+                  data-start="15"
+                  data-duration="15"
+                  data-hf-media-start-basis="local"
+                  muted
+                  playsinline
+                  style="position: absolute; inset: 0;"
+                ></video>
+
+                <div id="badge-dupes" class="badge-stamp stamp-zero-dupes" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
+                  ⚡ ZERO DUPLICATE RECORDS CREATED
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Dynamic Details -->
+            <div class="info-panel">
+              <!-- Card 1 -->
+              <div id="card-act4" class="card-elevated">
+                <div id="card-t-act4" class="card-title">IDEMPOTENT RECOVERY</div>
+                <div id="card-d-act4" class="card-body">
+                  When a network hiccup or agent retry occurs for an existing report ID, Orville verifies recorded IDs before attempting any write.
+                </div>
+                <div id="card-c-act4" class="code-block">
+[RETRY] Reusing verified GitHub comment: 5661232219
+[RETRY] Reusing verified Trello card: Tep5Jilu
+[RETRY] Reusing verified Discord message: 1548975043332284516
+-> Result: INSTANT SUCCESS (0 WRITES)
+                </div>
+              </div>
+
+              <!-- Card 2: Tests Suite -->
+              <div id="card-suite" class="card-elevated">
+                <div class="card-title">FULL LOCAL SUITE</div>
+                <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px;">
+                  <div id="test-num" class="stat-huge">42 / 42</div>
+                  <div style="font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 14px; color: #166534;">PASSED (100%)</div>
+                </div>
+                <div class="check-grid">
+                  <div class="check-item"><span>✓</span> <span>MALICIOUS INJECTION REFUSAL REGRESSIONS</span></div>
+                  <div class="check-item"><span>✓</span> <span>UNCERTAIN NETWORK & 5XX RECONCILIATION</span></div>
+                  <div class="check-item"><span>✓</span> <span>PRE-SELECTION REVIEW-PAUSE RESUME</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="caption-4" class="caption-bar">
+            RERUNNING A REPORT REUSES EXISTING RECORDS — NEVER SPAMS CHANNELS OR DUPLICATES CARDS
+          </div>
+        </div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true });
+
+        // Phase 1: Retry (0s - 15s)
+        tl.from(".window-frame", { scale: 0.92, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.2)
+          .from(".info-panel", { x: 50, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.4)
+          .fromTo("#badge-dupes", 
+            { scale: 0, opacity: 0, rotation: -15 }, 
+            { scale: 1, opacity: 1, rotation: -3, duration: 0.6, ease: "back.out(2)" }, 
+            4.5
+          );
+
+        // Phase 2: Tests (15s - 30s)
+        tl.to("#badge-dupes", { opacity: 0, duration: 0.4 }, 14.5)
+          .set("#act4-pill", { textContent: "TEST 2: AUTOMATED SUITE" }, 15.0)
+          .set("#video-title", { textContent: "PYTEST TEST SUITE (LOCAL RUNNER)" }, 15.0)
+          .set("#card-t-act4", { textContent: "42 AUTOMATED TESTS" }, 15.0)
+          .set("#card-d-act4", { textContent: "Every failure condition and network boundary is continuously exercised with mock destination adapters and strict assertions." }, 15.0)
+          .set("#card-c-act4", { textContent: "pytest tests/ -q\n================ 42 passed in 12.84s ================\nStatus: 100% GREEN" }, 15.0)
+          .from("#test-num", { scale: 0.8, color: "#000", duration: 0.5, ease: "back.out(2)" }, 16.0)
+          .set("#caption-4", { textContent: "42 AUTOMATED TESTS PROVE RESILIENCE UNDER NETWORK FAULTS & MALICIOUS ATTACKS" }, 15.0);
+
+        // Act 4 Exit
+        tl.to(".scene-container", { y: -40, opacity: 0, duration: 0.7, ease: "power2.in" }, 29.2);
+
+        window.__timelines["act4-retry"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

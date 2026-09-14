@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @font-face {
+          font-family: "Space Grotesk";
+          src: local("Space Grotesk"), local("Segoe UI Semibold"), local("Consolas");
+        }
+        @font-face {
+          font-family: "Inter";
+          src: local("Inter"), local("Segoe UI"), local("Arial");
+        }
+
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          background: #000000;
+          color: #FFFFFF;
+          font-family: "Inter", sans-serif;
+          overflow: hidden;
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .dotgrid {
+          position: absolute;
+          inset: 0;
+          opacity: 0.15;
+          background-image: radial-gradient(circle, #FFF 1.2px, transparent 1.2px);
+          background-size: 28px 28px;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .close-frame {
+          border: 4px solid #FFFFFF;
+          background: #111215;
+          color: #FFFFFF;
+          box-shadow: 12px 12px 0 #F7CB46;
+          padding: 44px 60px;
+          width: 1400px;
+          max-width: 90%;
+          position: relative;
+          z-index: 5;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        .pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          border: 3px solid #FFF;
+          background: #000;
+          color: #FFF;
+          box-shadow: 4px 4px 0 #F7CB46;
+          padding: 8px 22px;
+          border-radius: 9999px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          font-size: 14px;
+          margin-bottom: 20px;
+        }
+
+        .close-title {
+          font-size: 58px;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: -0.03em;
+          line-height: 0.95;
+          margin-bottom: 24px;
+        }
+
+        .arch-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 18px;
+          width: 100%;
+          margin-bottom: 28px;
+        }
+
+        .arch-card {
+          border: 3px solid #FFF;
+          background: #1E1F24;
+          box-shadow: 4px 4px 0 #F7CB46;
+          padding: 18px;
+          text-align: left;
+        }
+
+        .arch-pill {
+          display: inline-block;
+          border: 2px solid #000;
+          padding: 3px 8px;
+          font-family: "Space Grotesk", monospace;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+
+        .arch-title {
+          font-family: "Inter", sans-serif;
+          font-weight: 900;
+          font-size: 16px;
+          text-transform: uppercase;
+          margin-bottom: 6px;
+          color: #FFF;
+        }
+
+        .arch-desc {
+          font-family: "Space Grotesk", monospace;
+          font-size: 12px;
+          line-height: 1.4;
+          color: #CCC;
+        }
+
+        .receipts-row {
+          display: flex;
+          gap: 20px;
+          justify-content: center;
+          width: 100%;
+          margin-bottom: 24px;
+        }
+
+        .receipt-badge {
+          border: 2px solid #FFF;
+          background: #000;
+          padding: 8px 16px;
+          font-family: "Space Grotesk", monospace;
+          font-size: 13px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #4ADE80;
+        }
+
+        .btn-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          border: 3px solid #000;
+          background: #F7CB46;
+          color: #000;
+          box-shadow: 6px 6px 0 #FFF;
+          padding: 14px 34px;
+          font-family: "Inter", sans-serif;
+          font-weight: 900;
+          font-size: 18px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        .star-burst {
+          position: absolute;
+          background: #FE90E8;
+          border: 3px solid #FFF;
+          clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+          z-index: 6;
+        }
+      </style>
+
+      <div id="root" data-composition-id="act5-architecture" data-width="1920" data-height="1080">
+        <div class="dotgrid"></div>
+
+        <div id="star-close-1" class="star-burst" style="top: 60px; left: 120px; width: 110px; height: 110px;"></div>
+        <div id="star-close-2" class="star-burst" style="bottom: 70px; right: 120px; width: 120px; height: 120px; background: #F7CB46;"></div>
+
+        <div id="close-card" class="close-frame">
+          <div id="close-pill" class="pill">AGENTS FOR HUMANS HACKATHON 2026</div>
+          <h1 id="close-head" class="close-title">CUSTOMER HANDOFFS THAT FINISH WITH PROOF</h1>
+
+          <div class="arch-grid">
+            <div class="arch-card">
+              <span class="arch-pill" style="background: #FE90E8; color: #000;">AGENT CORE</span>
+              <div class="arch-title">STRANDS SDK</div>
+              <div class="arch-desc">Guarded tool registry, multi-turn loop, and structured exception handling.</div>
+            </div>
+
+            <div class="arch-card">
+              <span class="arch-pill" style="background: #C0F7FE; color: #000;">REASONING</span>
+              <div class="arch-title">GROQ OSS 120B</div>
+              <div class="arch-desc">Strict structured issue classification with deterministic safety constraints.</div>
+            </div>
+
+            <div class="arch-card">
+              <span class="arch-pill" style="background: #99E885; color: #000;">CROSS-APP</span>
+              <div class="arch-title">3 DESTINATIONS</div>
+              <div class="arch-desc">GitHub Issues + Trello Boards + Discord Webhooks coordinated seamlessly.</div>
+            </div>
+
+            <div class="arch-card">
+              <span class="arch-pill" style="background: #F7CB46; color: #000;">RELIABILITY</span>
+              <div class="arch-title">PROOF RECEIPT</div>
+              <div class="arch-desc">Independent GET readbacks, fail-safe human review, and idempotent retries.</div>
+            </div>
+          </div>
+
+          <div class="receipts-row">
+            <div class="receipt-badge"><span>✓</span> LIVE REPOSITORY: github.com/emmaGH1/orville</div>
+            <div class="receipt-badge"><span>✓</span> VERIFIED LANDING: orville-tau.vercel.app</div>
+            <div class="receipt-badge"><span>✓</span> 42/42 LOCAL TESTS PASSING</div>
+          </div>
+
+          <div id="cta-btn" class="btn-cta">
+            <span>EXPLORE THE ORVILLE SYSTEM BRIEF</span>
+            <span>→</span>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true });
+
+        // Entrance animation
+        tl.from("#close-card", { scale: 0.85, opacity: 0, duration: 0.8, ease: "back.out(1.5)" }, 0.2)
+          .from("#close-pill", { y: -20, opacity: 0, duration: 0.4, ease: "power2.out" }, 0.5)
+          .from("#close-head", { y: 20, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.6)
+          .from(".arch-card", { y: 30, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power3.out" }, 0.8)
+          .from(".receipt-badge", { scale: 0.9, opacity: 0, duration: 0.4, stagger: 0.1 }, 1.2)
+          .from("#cta-btn", { scale: 0, duration: 0.6, ease: "elastic.out(1, 0.5)" }, 1.4)
+          .from("#star-close-1", { scale: 0, rotation: -90, duration: 0.6, ease: "back.out(2)" }, 0.4)
+          .from("#star-close-2", { scale: 0, rotation: 90, duration: 0.6, ease: "back.out(2)" }, 0.6);
+
+        // Continuous rotation on stars - starts after entrance completes (at 1.3s)
+        tl.to("#star-close-1", { rotation: 360, duration: 18, ease: "none", repeat: 1 }, 1.3)
+          .to("#star-close-2", { rotation: -360, duration: 18, ease: "none", repeat: 1 }, 1.3);
+
+        // Gentle pulse on CTA button
+        tl.to("#cta-btn", { scale: 1.05, duration: 0.7, yoyo: true, repeat: 10, ease: "sine.inOut" }, 2.0);
+
+        window.__timelines["act5-architecture"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

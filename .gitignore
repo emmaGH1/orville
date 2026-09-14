@@ -4,6 +4,10 @@ AGENTS.md
 demo-work/
 recordings/
 raw-assets/
+demo-video/output/
+demo-video/snapshots/
+demo-video/assets/video/
+demo-video/assets/audio/*.wav
 .zcode/
 # Secrets and local state
 .env
