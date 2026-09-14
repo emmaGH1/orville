@@ -8,6 +8,7 @@ demo-video/output/
 demo-video/snapshots/
 demo-video/assets/video/
 demo-video/assets/audio/*.wav
+demo-video/assets/audio/voice/
 .zcode/
 # Secrets and local state
 .env

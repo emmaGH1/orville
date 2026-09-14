@@ -42,7 +42,7 @@
           inset: 0;
           display: flex;
           flex-direction: column;
-          padding: 40px 70px;
+          padding: 36px 60px;
           z-index: 5;
         }
 
@@ -50,11 +50,11 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 24px;
+          margin-bottom: 20px;
         }
 
         .title-block h2 {
-          font-size: 44px;
+          font-size: 40px;
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: -0.03em;
@@ -83,7 +83,7 @@
         .content-grid {
           display: grid;
           grid-template-columns: 1.1fr 1.3fr;
-          gap: 36px;
+          gap: 32px;
           flex: 1;
           align-items: stretch;
           min-height: 0;
@@ -93,7 +93,7 @@
           border: 4px solid #000;
           background: #FFFFFF;
           box-shadow: 8px 8px 0 #000;
-          padding: 26px;
+          padding: 24px;
           display: flex;
           flex-direction: column;
           position: relative;
@@ -102,18 +102,18 @@
         .card-title {
           font-family: "Inter", sans-serif;
           font-weight: 900;
-          font-size: 22px;
+          font-size: 20px;
           text-transform: uppercase;
           letter-spacing: -0.02em;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
 
         .card-desc {
           font-family: "Space Grotesk", monospace;
-          font-size: 15px;
-          line-height: 1.5;
+          font-size: 14px;
+          line-height: 1.45;
           color: #333;
-          margin-bottom: 16px;
+          margin-bottom: 14px;
         }
 
         .zero-box {
@@ -121,12 +121,14 @@
           background: #FFFDF5;
           padding: 16px;
           margin-top: auto;
+          box-shadow: 4px 4px 0 #000;
+          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .zero-title {
           font-family: "Space Grotesk", monospace;
           font-weight: 700;
-          font-size: 13px;
+          font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.08em;
           color: #666;
@@ -146,7 +148,7 @@
           text-align: center;
           font-family: "Space Grotesk", monospace;
           font-weight: 700;
-          font-size: 13px;
+          font-size: 12px;
         }
 
         .stat-badge strong {
@@ -165,7 +167,7 @@
         }
 
         .review-header {
-          padding: 12px 20px;
+          padding: 10px 18px;
           background: #18181B;
           color: #FFF;
           border-bottom: 3px solid #000;
@@ -178,11 +180,11 @@
         }
 
         .review-body {
-          padding: 24px;
+          padding: 20px;
           flex: 1;
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 14px;
           background: #FAFAFA;
         }
 
@@ -190,14 +192,13 @@
           border: 3px solid #000;
           background: #FFF;
           box-shadow: 4px 4px 0 #000;
-          padding: 16px 20px;
+          padding: 14px 18px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           font-family: "Space Grotesk", monospace;
           font-weight: 700;
-          font-size: 15px;
-          cursor: pointer;
+          font-size: 14px;
         }
 
         .btn-select {
@@ -216,7 +217,7 @@
           padding: 10px 18px;
           font-family: "Space Grotesk", monospace;
           font-weight: 700;
-          font-size: 14px;
+          font-size: 13px;
           text-align: center;
           margin-top: 10px;
           box-shadow: 4px 4px 0 #000;
@@ -229,28 +230,27 @@
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: 0.04em;
-          padding: 12px 22px;
-          font-size: 20px;
+          padding: 10px 20px;
+          font-size: 18px;
           z-index: 10;
         }
 
         .stamp-needs-human {
-          top: 240px;
-          right: 30px;
+          top: 220px;
+          right: 20px;
           background: #F7CB46;
-          color: #000;
           transform: rotate(-3deg);
         }
 
         .caption-bar {
-          margin-top: 18px;
+          margin-top: 16px;
           background: #000;
           color: #FFF;
           border: 3px solid #FFF;
           box-shadow: 6px 6px 0 #F7CB46;
-          padding: 12px 28px;
+          padding: 10px 24px;
           font-weight: 800;
-          font-size: 20px;
+          font-size: 18px;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           width: fit-content;
@@ -262,113 +262,142 @@
         <div class="dotgrid"></div>
 
         <div class="scene-container">
+          <!-- Header -->
           <div class="header-row">
             <div class="title-block">
-              <div class="pill pill-blue">ACT III · HUMAN-IN-THE-LOOP SAFETY</div>
+              <div class="pill pill-blue" style="margin-bottom: 8px;">ACT III · HUMAN-IN-THE-LOOP SAFETY</div>
               <h2>AMBIGUOUS MATCH? STOP & ESCALATE</h2>
             </div>
-            <div id="status-pill" class="pill pill-yellow">STATUS: NEEDS_HUMAN</div>
+            <div id="status-pill" class="pill pill-yellow">STATUS: AWAITING SELECTION</div>
           </div>
 
+          <!-- Content Grid -->
           <div class="content-grid">
-            <!-- Left Card: Ambiguity Detection -->
-            <div id="card-ambiguity" class="card-elevated">
+            <!-- Left: Ambiguity & Zero Writes Card -->
+            <div class="card-elevated">
               <div class="card-title">CONFIDENCE DIVIDED BETWEEN 2 CANDIDATES</div>
               <div class="card-desc">
                 When a customer bug report could plausibly match multiple open issues, generic agents guess and corrupt project tracking. Orville enforces a hard stop:
               </div>
-
-              <div style="background: #18181B; color: #FFF; padding: 14px; border: 2px solid #000; font-family: monospace; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+              <div class="code-block" style="background: #18181B; color: #72F1F8; padding: 12px; font-family: 'Space Grotesk', monospace; font-size: 13px; border: 2px solid #000; margin-bottom: 12px;">
 // Strands Safety Boundary Check:
 stop_reason: "needs_human"
 candidates_found: [Issue #1, Issue #2]
 action: "HALT EXECUTION — ZERO WRITES"
               </div>
 
-              <!-- Zero writes proof -->
-              <div class="zero-box">
-                <div class="zero-title">OBSERVED WRITES BEFORE OPERATOR APPROVAL:</div>
-                <div class="zero-stats">
-                  <div class="stat-badge"><strong>0</strong> GITHUB WRITES</div>
-                  <div class="stat-badge"><strong>0</strong> TRELLO CARDS</div>
-                  <div class="stat-badge"><strong>0</strong> DISCORD POSTS</div>
-                </div>
+              <!-- Stamp -->
+              <div id="badge-human" class="badge-stamp stamp-needs-human" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
+                ⚠️ NEEDS_HUMAN · 0 WRITES PERFORMED
               </div>
 
-              <div id="stamp-human" class="badge-stamp stamp-needs-human" data-layout-allow-overlap="true" data-layout-allow-occlusion="true">
-                ⚠️ NEEDS_HUMAN · 0 WRITES PERFORMED
+              <!-- Zero Writes Box -->
+              <div id="zero-writes-card" class="zero-box">
+                <div class="zero-title">OBSERVED WRITES BEFORE OPERATOR APPROVAL:</div>
+                <div class="zero-stats">
+                  <div class="stat-badge">
+                    <strong>0</strong>
+                    <span>GITHUB WRITES</span>
+                  </div>
+                  <div class="stat-badge">
+                    <strong>0</strong>
+                    <span>TRELLO CARDS</span>
+                  </div>
+                  <div class="stat-badge">
+                    <strong>0</strong>
+                    <span>DISCORD POSTS</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Right Card: Operator Selection & Resume -->
-            <div id="card-operator" class="review-window">
+            <!-- Right: Simulated Operator UI -->
+            <div class="review-window">
               <div class="review-header">
                 <span>ORVILLE OPERATOR REVIEW MODAL</span>
-                <span style="color: #F7CB46;">AWAITING SELECTION</span>
+                <span id="review-tag" style="color: #F7CB46;">AWAITING SELECTION</span>
               </div>
               <div class="review-body">
-                <p style="font-family: 'Space Grotesk', monospace; font-size: 14px; font-weight: 600;">
+                <div style="font-family: 'Space Grotesk', monospace; font-size: 14px; font-weight: 700; color: #333;">
                   Report REVIEW-DEMO-05 matched 2 plausible candidate issues. Choose destination:
-                </p>
-
-                <!-- Candidate 1 -->
-                <div id="cand-1" class="candidate-option">
-                  <div>
-                    <span style="font-weight: 900;">#1:</span> CSV export stalls on 5k+ rows
-                  </div>
-                  <div class="btn-select">Select</div>
                 </div>
 
-                <!-- Candidate 2 -->
-                <div id="cand-2" class="candidate-option">
+                <div id="opt-1" class="candidate-option">
                   <div>
-                    <span style="font-weight: 900;">#2:</span> Account settings scope check
+                    <div style="color: #000; font-size: 15px;">#1: CSV export stalls on 5k+ rows</div>
                   </div>
-                  <div id="btn-c2" class="btn-select">Select</div>
+                  <button class="btn-select">SELECT</button>
                 </div>
 
-                <!-- Resumed Result Box -->
+                <div id="opt-2" class="candidate-option">
+                  <div>
+                    <div style="color: #000; font-size: 15px;">#2: Account settings scope check</div>
+                  </div>
+                  <button id="btn-opt2" class="btn-select">SELECT</button>
+                </div>
+
                 <div id="resume-box" class="resume-badge" style="opacity: 0;">
-                  ✅ OPERATOR SELECTED ISSUE #2 -> RESUMED -> COMPLETE (1 RECORD PER APP)
+                  ✓ OPERATOR SELECTED ISSUE #2 -> RESUMED -> COMPLETE (1 RECORD PER APP)
                 </div>
 
-                <!-- Terminal readback snippet -->
-                <div id="resume-trace" style="background: #18181B; color: #4ADE80; padding: 12px; border: 2px solid #000; font-family: monospace; font-size: 12px; opacity: 0;">
-tool: "operator_selection" -> issue: 2
-tool: "record_engineering_handoff" -> verified
-tool: "create_customer_followup" -> verified
-tool: "publish_team_update" -> verified
-result: PASS — EXACTLY 1 RECORD PER APP
+                <div id="resume-details" style="opacity: 0; font-family: 'Space Grotesk', monospace; font-size: 12px; color: #444; background: #E5E7EB; border: 2px solid #000; padding: 10px; margin-top: 6px;">
+                  tool: "operator_selection" -> issue: 2
+                  tool: "record_engineering_handoff" -> verified
+                  tool: "create_customer_followup" -> verified
+                  tool: "publish_team_update" -> verified
+                  result: PASS — EXACTLY 1 RECORD PER APP
                 </div>
               </div>
             </div>
           </div>
 
-          <div id="caption-3" class="caption-bar">
-            WHEN AMBIGUOUS, ORVILLE REFUSES TO GUESS — OPERATOR APPROVAL RESUMES SAFELY
+          <!-- Bottom Caption Bar -->
+          <div id="caption-bar-3" class="caption-bar">
+            OPERATOR SELECTION SAFELY RESUMES THE PIPELINE TO COMPLETION
           </div>
         </div>
       </div>
 
       <script>
         const tl = gsap.timeline({ paused: true });
+        const zeroBox = document.getElementById("zero-writes-card");
 
-        // Scene Entrance (0s - 1s)
-        tl.from("#card-ambiguity", { x: -60, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.2)
-          .from("#card-operator", { x: 60, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.3)
-          .from("#stamp-human", { scale: 0, rotation: -20, duration: 0.6, ease: "back.out(2)" }, 1.0);
+        // Entrance
+        tl.from(".content-grid", { scale: 0.94, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.1);
 
-        // Operator interaction simulation (12s - 18s)
-        tl.to("#cand-2", { scale: 1.04, background: "#FEF08A", duration: 0.4 }, 12.0)
-          .set("#btn-c2", { textContent: "CLICKED ✓", background: "#4ADE80" }, 13.5)
-          .to("#cand-2", { background: "#BBF7D0", duration: 0.3 }, 13.5)
-          .to("#resume-box", { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" }, 14.5)
-          .to("#resume-trace", { opacity: 1, duration: 0.5 }, 16.0)
-          .set("#status-pill", { textContent: "STATUS: COMPLETE", background: "#99E885" }, 16.0)
-          .set("#caption-3", { textContent: "OPERATOR SELECTION SAFELY RESUMES THE PIPELINE TO COMPLETION" }, 14.5);
+        // Badge pops at 2.5s
+        tl.fromTo("#badge-human", 
+          { scale: 0, opacity: 0, rotation: -15 }, 
+          { scale: 1, opacity: 1, rotation: -3, duration: 0.5, ease: "back.out(2)" }, 
+          2.5
+        );
 
-        // Scene Exit (29s - 30s)
-        tl.to(".scene-container", { y: -40, opacity: 0, duration: 0.7, ease: "power2.in" }, 29.2);
+        // Punch-in zoom onto Zero-Writes box at 3.5s
+        tl.to(zeroBox, {
+          scale: 1.35,
+          y: -25,
+          duration: 0.8,
+          ease: "power2.out"
+        }, 3.5);
+
+        // Zoom out zeroBox at 9s
+        tl.to(zeroBox, {
+          scale: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.inOut"
+        }, 9.0);
+
+        // Operator selects candidate #2 at 11s
+        tl.to("#opt-2", { background: "#C0F7FE", borderColor: "#000", scale: 1.03, duration: 0.3 }, 11.0)
+          .set("#btn-opt2", { textContent: "CLICKED ✓", background: "#99E885" }, 11.3)
+          .to("#resume-box", { opacity: 1, y: 0, duration: 0.4 }, 12.0)
+          .to("#resume-details", { opacity: 1, duration: 0.4 }, 12.8)
+          .set("#status-pill", { textContent: "STATUS: RESUMED & COMPLETE", background: "#99E885" }, 13.0)
+          .set("#review-tag", { textContent: "RESOLVED", color: "#22C55E" }, 13.0);
+
+        // Exit at 24.2s
+        tl.to(".scene-container", { y: -30, opacity: 0, duration: 0.5, ease: "power2.in" }, 24.2);
 
         window.__timelines["act3-escalation"] = tl;
       </script>

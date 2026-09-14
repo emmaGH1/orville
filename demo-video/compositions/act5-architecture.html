@@ -45,9 +45,9 @@
           background: #111215;
           color: #FFFFFF;
           box-shadow: 12px 12px 0 #F7CB46;
-          padding: 44px 60px;
+          padding: 36px 54px;
           width: 1400px;
-          max-width: 90%;
+          max-width: 92%;
           position: relative;
           z-index: 5;
           display: flex;
@@ -56,46 +56,48 @@
           text-align: center;
         }
 
-        .pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
+        .orville-emblem {
+          width: 85px;
+          height: 85px;
+          background: #F7CB46;
           border: 3px solid #FFF;
-          background: #000;
-          color: #FFF;
-          box-shadow: 4px 4px 0 #F7CB46;
-          padding: 8px 22px;
-          border-radius: 9999px;
-          font-family: "Space Grotesk", monospace;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          font-size: 14px;
-          margin-bottom: 20px;
+          box-shadow: 5px 5px 0 #000;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 10px;
+          overflow: hidden;
+        }
+
+        .orville-emblem img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
         }
 
         .close-title {
-          font-size: 58px;
+          font-size: 48px;
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: -0.03em;
           line-height: 0.95;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         }
 
         .arch-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 18px;
+          gap: 16px;
           width: 100%;
-          margin-bottom: 28px;
+          margin-bottom: 24px;
         }
 
         .arch-card {
           border: 3px solid #FFF;
           background: #1E1F24;
           box-shadow: 4px 4px 0 #F7CB46;
-          padding: 18px;
+          padding: 16px;
           text-align: left;
         }
 
@@ -107,15 +109,15 @@
           font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
         }
 
         .arch-title {
           font-family: "Inter", sans-serif;
           font-weight: 900;
-          font-size: 16px;
+          font-size: 15px;
           text-transform: uppercase;
-          margin-bottom: 6px;
+          margin-bottom: 5px;
           color: #FFF;
         }
 
@@ -128,10 +130,10 @@
 
         .receipts-row {
           display: flex;
-          gap: 20px;
+          gap: 16px;
           justify-content: center;
           width: 100%;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
         }
 
         .receipt-badge {
@@ -139,7 +141,7 @@
           background: #000;
           padding: 8px 16px;
           font-family: "Space Grotesk", monospace;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 700;
           display: flex;
           align-items: center;
@@ -155,10 +157,10 @@
           background: #F7CB46;
           color: #000;
           box-shadow: 6px 6px 0 #FFF;
-          padding: 14px 34px;
+          padding: 12px 32px;
           font-family: "Inter", sans-serif;
           font-weight: 900;
-          font-size: 18px;
+          font-size: 17px;
           text-transform: uppercase;
           letter-spacing: 0.04em;
         }
@@ -175,11 +177,25 @@
       <div id="root" data-composition-id="act5-architecture" data-width="1920" data-height="1080">
         <div class="dotgrid"></div>
 
-        <div id="star-close-1" class="star-burst" style="top: 60px; left: 120px; width: 110px; height: 110px;"></div>
-        <div id="star-close-2" class="star-burst" style="bottom: 70px; right: 120px; width: 120px; height: 120px; background: #F7CB46;"></div>
+        <div id="star-close-1" class="star-burst" style="top: 60px; left: 120px; width: 100px; height: 100px;"></div>
+        <div id="star-close-2" class="star-burst" style="bottom: 70px; right: 120px; width: 110px; height: 110px; background: #F7CB46;"></div>
 
         <div id="close-card" class="close-frame">
-          <div id="close-pill" class="pill">AGENTS FOR HUMANS HACKATHON 2026</div>
+          <!-- Logo & Hackathon Header -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 14px;">
+            <div class="orville-emblem">
+              <img src="assets/logo.png" alt="Orville Logo" />
+            </div>
+            <div style="text-align: left;">
+              <div style="font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 13px; color: #72F1F8; text-transform: uppercase; letter-spacing: 0.08em;">
+                AGENTS FOR HUMANS HACKATHON 2026
+              </div>
+              <div style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 32px; text-transform: uppercase; color: #FFF; line-height: 1;">
+                ORVILLE · GUARDED SUPPORT HANDOFF
+              </div>
+            </div>
+          </div>
+
           <h1 id="close-head" class="close-title">CUSTOMER HANDOFFS THAT FINISH WITH PROOF</h1>
 
           <div class="arch-grid">
@@ -225,21 +241,20 @@
         const tl = gsap.timeline({ paused: true });
 
         // Entrance animation
-        tl.from("#close-card", { scale: 0.85, opacity: 0, duration: 0.8, ease: "back.out(1.5)" }, 0.2)
-          .from("#close-pill", { y: -20, opacity: 0, duration: 0.4, ease: "power2.out" }, 0.5)
-          .from("#close-head", { y: 20, opacity: 0, duration: 0.5, ease: "power2.out" }, 0.6)
-          .from(".arch-card", { y: 30, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power3.out" }, 0.8)
-          .from(".receipt-badge", { scale: 0.9, opacity: 0, duration: 0.4, stagger: 0.1 }, 1.2)
-          .from("#cta-btn", { scale: 0, duration: 0.6, ease: "elastic.out(1, 0.5)" }, 1.4)
-          .from("#star-close-1", { scale: 0, rotation: -90, duration: 0.6, ease: "back.out(2)" }, 0.4)
-          .from("#star-close-2", { scale: 0, rotation: 90, duration: 0.6, ease: "back.out(2)" }, 0.6);
+        tl.from("#close-card", { scale: 0.88, opacity: 0, duration: 0.7, ease: "back.out(1.5)" }, 0.1)
+          .from("#close-head", { y: 15, opacity: 0, duration: 0.4, ease: "power2.out" }, 0.4)
+          .from(".arch-card", { y: 20, opacity: 0, duration: 0.4, stagger: 0.08, ease: "power3.out" }, 0.6)
+          .from(".receipt-badge", { scale: 0.9, opacity: 0, duration: 0.3, stagger: 0.08 }, 0.9)
+          .from("#cta-btn", { scale: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" }, 1.1)
+          .from("#star-close-1", { scale: 0, rotation: -90, duration: 0.5, ease: "back.out(2)" }, 0.3)
+          .from("#star-close-2", { scale: 0, rotation: 90, duration: 0.5, ease: "back.out(2)" }, 0.5);
 
-        // Continuous rotation on stars - starts after entrance completes (at 1.3s)
-        tl.to("#star-close-1", { rotation: 360, duration: 18, ease: "none", repeat: 1 }, 1.3)
-          .to("#star-close-2", { rotation: -360, duration: 18, ease: "none", repeat: 1 }, 1.3);
+        // Continuous rotation on stars
+        tl.to("#star-close-1", { rotation: 360, duration: 22, ease: "none", repeat: 1 }, 1.0)
+          .to("#star-close-2", { rotation: -360, duration: 22, ease: "none", repeat: 1 }, 1.0);
 
         // Gentle pulse on CTA button
-        tl.to("#cta-btn", { scale: 1.05, duration: 0.7, yoyo: true, repeat: 10, ease: "sine.inOut" }, 2.0);
+        tl.to("#cta-btn", { scale: 1.04, duration: 0.8, yoyo: true, repeat: 12, ease: "sine.inOut" }, 1.8);
 
         window.__timelines["act5-architecture"] = tl;
       </script>

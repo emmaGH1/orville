@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Act 0: The Hook & Logo Splash</title>
+</head>
+<body>
+<template>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 900;
+      src: local('Inter-Black'), local('Inter Black'), local('Inter');
+    }
+    @font-face {
+      font-family: 'Space Grotesk';
+      font-style: normal;
+      font-weight: 700;
+      src: local('SpaceGrotesk-Bold'), local('Space Grotesk Bold'), local('Space Grotesk');
+    }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #121316;
+      color: #FFFFFF;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .act0-container {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      overflow: hidden;
+    }
+
+    .act0-typewriter-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 1200px;
+      background: #FFFDF5;
+      border: 4px solid #000;
+      box-shadow: 12px 12px 0 #FFDC8B;
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 10;
+    }
+
+    .act0-prompt-label {
+      font-family: 'Space Grotesk', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      color: #FF3366;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .act0-typewriter-text {
+      font-family: 'Inter', sans-serif;
+      font-weight: 900;
+      font-size: 42px;
+      line-height: 1.25;
+      color: #000;
+      text-transform: uppercase;
+      min-height: 120px;
+    }
+
+    .act0-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-7deg) scale(0);
+      background: #FF3366;
+      color: #FFF;
+      border: 5px solid #000;
+      box-shadow: 8px 8px 0 #000;
+      padding: 16px 36px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 900;
+      font-size: 38px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      z-index: 20;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .act0-logo-splash {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #121316;
+      gap: 24px;
+      opacity: 0;
+      transform: scale(0.9);
+      z-index: 30;
+    }
+
+    .act0-logo-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 900;
+      font-size: 80px;
+      color: #FFF;
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .act0-logo-sub {
+      font-family: 'Space Grotesk', monospace;
+      font-weight: 700;
+      font-size: 20px;
+      color: #72F1F8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: #000;
+      border: 3px solid #FFF;
+      box-shadow: 6px 6px 0 #FFE66D;
+      padding: 10px 24px;
+    }
+
+    .starburst {
+      position: absolute;
+      font-size: 80px;
+      font-weight: 900;
+      z-index: 2;
+    }
+  </style>
+
+  <div id="root" data-composition-id="act0-hook" data-width="1920" data-height="1080">
+    <div class="dotgrid" style="opacity: 0.35; background-image: radial-gradient(circle, #FFF 1.5px, transparent 1.5px);"></div>
+
+    <!-- Starbursts -->
+    <div id="act0-star1" class="starburst" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="top: 80px; left: 100px; color: #FFE66D; transform: scale(1.4);">✦</div>
+    <div id="act0-star2" class="starburst" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="bottom: 90px; right: 120px; color: #FE90E8; transform: scale(1.6);">✦</div>
+
+    <div class="act0-container">
+      <!-- Typewriter Window -->
+      <div id="act0-tw-card" class="act0-typewriter-box">
+        <div class="act0-prompt-label">
+          <span style="width: 12px; height: 12px; background: #FF3366; border-radius: 50%; display: inline-block;"></span>
+          CRITICAL VULNERABILITY SCENARIO
+        </div>
+        <div id="act0-tw-text" class="act0-typewriter-text">
+          <span id="act0-typed-chars"></span><span class="typewriter-cursor"></span>
+        </div>
+      </div>
+
+      <!-- Red Denial Stamp -->
+      <div id="act0-stamp-box" class="act0-stamp" data-layout-allow-overlap="true" data-layout-allow-occlusion="true">
+        ⛔ MALICIOUS INJECTION REFUSED
+      </div>
+
+      <!-- Slam-in Logo Splash -->
+      <div id="act0-splash-box" class="act0-logo-splash" data-layout-allow-overlap="true" data-layout-allow-occlusion="true">
+        <div class="orville-emblem orville-emblem-dark" style="width: 170px; height: 170px;">
+          <img src="assets/logo.png" alt="Orville Logo" />
+        </div>
+        <div class="act0-logo-title">
+          ORVILLE
+        </div>
+        <div class="act0-logo-sub">
+          GUARDED SUPPORT HANDOFF AGENT · POWERED BY STRANDS SDK
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fullText = "WHAT HAPPENS WHEN AN UNTRUSTED BUG REPORT TELLS YOUR AI AGENT: 'DELETE OUR PRODUCTION DATABASE'?";
+    const typedEl = document.getElementById('act0-typed-chars');
+    const stampEl = document.getElementById('act0-stamp-box');
+    const twCard = document.getElementById('act0-tw-card');
+    const splashEl = document.getElementById('act0-splash-box');
+    const star1 = document.getElementById('act0-star1');
+    const star2 = document.getElementById('act0-star2');
+
+    const textProxy = { count: 0 };
+    const tl = gsap.timeline({ paused: true });
+
+    tl.to(textProxy, {
+      count: fullText.length,
+      duration: 3.8,
+      ease: 'none',
+      onUpdate: () => {
+        const len = Math.floor(textProxy.count);
+        typedEl.textContent = fullText.slice(0, len);
+      }
+    }, 0.2);
+
+    // Red Stamp Slam in at 4.2s
+    tl.to(stampEl, {
+      scale: 1,
+      duration: 0.35,
+      ease: 'back.out(2.5)'
+    }, 4.2);
+
+    // Fade out typewriter card at 5.5s
+    tl.to([twCard, stampEl], {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.4,
+      ease: 'power2.in'
+    }, 5.5);
+
+    // Slam in Logo Splash at 6.0s
+    tl.to(splashEl, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.6,
+      ease: 'back.out(1.8)'
+    }, 6.0);
+
+    // Gentle starburst spin
+    tl.to(star1, { rotation: 180, duration: 10, ease: 'none' }, 0);
+    tl.to(star2, { rotation: -180, duration: 10, ease: 'none' }, 0);
+
+    window.__timelines["act0-hook"] = tl;
+  </script>
+</template>
+</body>
+</html>

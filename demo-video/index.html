@@ -40,73 +40,85 @@
       data-start="0"
       data-width="1920"
       data-height="1080"
-      data-duration="165"
+      data-duration="135"
     >
-      <!-- Background Audio Track (Upbeat tech groove, 165s) -->
+      <!-- Master Audio Track (Voiceover + Ducked Synth Groove, 135s) -->
       <audio
-        id="bgm"
-        src="assets/audio/background-tech.mp3"
+        id="master-audio"
+        src="assets/audio/master-soundtrack.mp3"
         data-start="0"
-        data-duration="165"
+        data-duration="135"
         data-track-index="0"
       ></audio>
 
-      <!-- Act 1: Hook & Scenario (0s - 25s) -->
+      <!-- Act 0: Cold Open Typewriter Hook & Logo Splash (0s - 10s) -->
       <div
-        id="slot-act1"
-        data-composition-id="act1-hook"
-        data-composition-src="compositions/act1-hook.html"
+        id="slot-act0"
+        data-composition-id="act0-hook"
+        data-composition-src="compositions/act0-hook.html"
         data-start="0"
-        data-duration="25"
+        data-duration="10"
         data-track-index="1"
         data-width="1920"
         data-height="1080"
       ></div>
 
-      <!-- Act 2: Guarded 3-App Strands Run (25s - 85s) -->
+      <!-- Act 1: Problem & Target Audience (10s - 25s) -->
       <div
-        id="slot-act2"
-        data-composition-id="act2-pipeline"
-        data-composition-src="compositions/act2-pipeline.html"
-        data-start="25"
-        data-duration="60"
+        id="slot-act1"
+        data-composition-id="act1-hook"
+        data-composition-src="compositions/act1-hook.html"
+        data-start="10"
+        data-duration="15"
         data-track-index="2"
         data-width="1920"
         data-height="1080"
       ></div>
 
-      <!-- Act 3: Human Escalation & Review (85s - 115s) -->
+      <!-- Act 2: Guarded 3-App Strands Run (25s - 65s) -->
       <div
-        id="slot-act3"
-        data-composition-id="act3-escalation"
-        data-composition-src="compositions/act3-escalation.html"
-        data-start="85"
-        data-duration="30"
+        id="slot-act2"
+        data-composition-id="act2-pipeline"
+        data-composition-src="compositions/act2-pipeline.html"
+        data-start="25"
+        data-duration="40"
         data-track-index="3"
         data-width="1920"
         data-height="1080"
       ></div>
 
-      <!-- Act 4: Idempotent Retry & Test Proof (115s - 145s) -->
+      <!-- Act 3: Human Escalation & Zero Writes (65s - 90s) -->
       <div
-        id="slot-act4"
-        data-composition-id="act4-retry"
-        data-composition-src="compositions/act4-retry.html"
-        data-start="115"
-        data-duration="30"
+        id="slot-act3"
+        data-composition-id="act3-escalation"
+        data-composition-src="compositions/act3-escalation.html"
+        data-start="65"
+        data-duration="25"
         data-track-index="4"
         data-width="1920"
         data-height="1080"
       ></div>
 
-      <!-- Act 5: Architecture & Closing Plate (145s - 165s) -->
+      <!-- Act 4: Idempotent Retry & Test Proof (90s - 110s) -->
+      <div
+        id="slot-act4"
+        data-composition-id="act4-retry"
+        data-composition-src="compositions/act4-retry.html"
+        data-start="90"
+        data-duration="20"
+        data-track-index="5"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+      <!-- Act 5: Architecture & Closing Receipts (110s - 135s) -->
       <div
         id="slot-act5"
         data-composition-id="act5-architecture"
         data-composition-src="compositions/act5-architecture.html"
-        data-start="145"
-        data-duration="20"
-        data-track-index="5"
+        data-start="110"
+        data-duration="25"
+        data-track-index="6"
         data-width="1920"
         data-height="1080"
       ></div>
@@ -115,8 +127,8 @@
     <script>
       const tl = gsap.timeline({ paused: true });
 
-      // Audio volume automation (gentle fade out at the end)
-      tl.to("#bgm", { volume: 0, duration: 4.0, ease: "power2.in" }, 161.0);
+      // Audio fade-out at the end
+      tl.to("#master-audio", { volume: 0, duration: 3.5, ease: "power2.in" }, 131.5);
 
       window.__timelines["orville-demo"] = tl;
     </script>

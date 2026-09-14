@@ -42,7 +42,7 @@
           inset: 0;
           display: flex;
           flex-direction: column;
-          padding: 36px 60px;
+          padding: 30px 60px;
           z-index: 5;
         }
 
@@ -50,11 +50,11 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 16px;
         }
 
         .title-block h2 {
-          font-size: 44px;
+          font-size: 40px;
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: -0.03em;
@@ -83,7 +83,7 @@
           position: relative;
           flex: 1;
           display: flex;
-          gap: 30px;
+          gap: 28px;
           align-items: stretch;
           min-height: 0;
         }
@@ -103,7 +103,7 @@
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 10px 18px;
+          padding: 8px 16px;
           background: #18181B;
           color: #FFF;
           border-bottom: 3px solid #000;
@@ -140,58 +140,81 @@
           width: 100%;
           height: 100%;
           object-fit: contain;
+          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .info-panel {
           flex: 1;
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 14px;
         }
 
         .card-elevated {
           border: 4px solid #000;
           background: #FFFFFF;
           box-shadow: 8px 8px 0 #000;
-          padding: 22px;
+          padding: 20px;
           position: relative;
+          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .card-title {
           font-family: "Inter", sans-serif;
           font-weight: 900;
           text-transform: uppercase;
-          font-size: 20px;
+          font-size: 18px;
           letter-spacing: -0.02em;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .card-body {
           font-family: "Space Grotesk", monospace;
-          font-size: 14px;
-          line-height: 1.5;
+          font-size: 13px;
+          line-height: 1.45;
           color: #222;
         }
 
         .code-block {
           background: #18181B;
           color: #4ADE80;
-          padding: 12px;
+          padding: 10px;
           border: 2px solid #000;
           font-family: "Space Grotesk", monospace;
-          font-size: 13px;
+          font-size: 12px;
           line-height: 1.4;
-          margin-top: 10px;
+          margin-top: 8px;
           white-space: pre-wrap;
           word-break: break-all;
         }
 
         .stat-huge {
-          font-size: 64px;
+          font-family: "Inter", sans-serif;
           font-weight: 900;
+          font-size: 54px;
           line-height: 1;
-          color: #15803D;
-          letter-spacing: -0.03em;
+          letter-spacing: -0.04em;
+          color: #166534;
+        }
+
+        .check-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          margin-top: 8px;
+        }
+
+        .check-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          border: 2px solid #000;
+          background: #C0F7FE;
+          padding: 6px 12px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 700;
+          font-size: 12px;
+          box-shadow: 2px 2px 0 #000;
         }
 
         .badge-stamp {
@@ -201,8 +224,8 @@
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: 0.04em;
-          padding: 10px 18px;
-          font-size: 18px;
+          padding: 8px 16px;
+          font-size: 16px;
           z-index: 10;
         }
 
@@ -214,35 +237,15 @@
           transform: rotate(-3deg);
         }
 
-        .check-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-top: 10px;
-        }
-
-        .check-item {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          border: 2px solid #000;
-          background: #C0F7FE;
-          padding: 8px 12px;
-          font-family: "Space Grotesk", monospace;
-          font-weight: 700;
-          font-size: 12px;
-          box-shadow: 3px 3px 0 #000;
-        }
-
         .caption-bar {
-          margin-top: 18px;
+          margin-top: 14px;
           background: #000;
           color: #FFF;
           border: 3px solid #FFF;
           box-shadow: 6px 6px 0 #F7CB46;
-          padding: 12px 28px;
+          padding: 10px 24px;
           font-weight: 800;
-          font-size: 20px;
+          font-size: 18px;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           width: fit-content;
@@ -279,7 +282,7 @@
                   id="vid-retry"
                   src="assets/video/06-retry.mp4"
                   data-start="0"
-                  data-duration="15"
+                  data-duration="10"
                   data-hf-media-start-basis="local"
                   muted
                   playsinline
@@ -288,8 +291,8 @@
                 <video
                   id="vid-tests"
                   src="assets/video/07-tests.mp4"
-                  data-start="15"
-                  data-duration="15"
+                  data-start="10"
+                  data-duration="10"
                   data-hf-media-start-basis="local"
                   muted
                   playsinline
@@ -314,14 +317,14 @@
 [RETRY] Reusing verified GitHub comment: 5661232219
 [RETRY] Reusing verified Trello card: Tep5Jilu
 [RETRY] Reusing verified Discord message: 1548975043332284516
--> Result: INSTANT SUCCESS (0 WRITES)
+-> Result: INSTANT SUCCESS (0 DUPLICATES)
                 </div>
               </div>
 
               <!-- Card 2: Tests Suite -->
               <div id="card-suite" class="card-elevated">
                 <div class="card-title">FULL LOCAL SUITE</div>
-                <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px;">
                   <div id="test-num" class="stat-huge">42 / 42</div>
                   <div style="font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 14px; color: #166534;">PASSED (100%)</div>
                 </div>
@@ -342,28 +345,56 @@
 
       <script>
         const tl = gsap.timeline({ paused: true });
+        const cardSuite = document.getElementById("card-suite");
+        const vidRetry = document.getElementById("vid-retry");
 
-        // Phase 1: Retry (0s - 15s)
-        tl.from(".window-frame", { scale: 0.92, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.2)
-          .from(".info-panel", { x: 50, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.4)
+        // Phase 1: Retry (0s - 10s)
+        tl.from(".window-frame", { scale: 0.94, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.1)
+          .from(".info-panel", { x: 40, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2)
           .fromTo("#badge-dupes", 
             { scale: 0, opacity: 0, rotation: -15 }, 
-            { scale: 1, opacity: 1, rotation: -3, duration: 0.6, ease: "back.out(2)" }, 
-            4.5
+            { scale: 1, opacity: 1, rotation: -3, duration: 0.5, ease: "back.out(2)" }, 
+            2.5
           );
 
-        // Phase 2: Tests (15s - 30s)
-        tl.to("#badge-dupes", { opacity: 0, duration: 0.4 }, 14.5)
-          .set("#act4-pill", { textContent: "TEST 2: AUTOMATED SUITE" }, 15.0)
-          .set("#video-title", { textContent: "PYTEST TEST SUITE (LOCAL RUNNER)" }, 15.0)
-          .set("#card-t-act4", { textContent: "42 AUTOMATED TESTS" }, 15.0)
-          .set("#card-d-act4", { textContent: "Every failure condition and network boundary is continuously exercised with mock destination adapters and strict assertions." }, 15.0)
-          .set("#card-c-act4", { textContent: "pytest tests/ -q\n================ 42 passed in 12.84s ================\nStatus: 100% GREEN" }, 15.0)
-          .from("#test-num", { scale: 0.8, color: "#000", duration: 0.5, ease: "back.out(2)" }, 16.0)
-          .set("#caption-4", { textContent: "42 AUTOMATED TESTS PROVE RESILIENCE UNDER NETWORK FAULTS & MALICIOUS ATTACKS" }, 15.0);
+        // Zoom into retry video at 3.5s
+        tl.to(vidRetry, {
+          scale: 1.3,
+          x: 20,
+          y: -20,
+          duration: 0.8,
+          ease: "power2.out"
+        }, 3.5);
+
+        // Zoom out vidRetry at 8.5s
+        tl.to(vidRetry, {
+          scale: 1,
+          x: 0,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.inOut"
+        }, 8.5);
+
+        // Phase 2: Tests (10s - 20s)
+        tl.to("#badge-dupes", { opacity: 0, duration: 0.3 }, 9.5)
+          .set("#act4-pill", { textContent: "TEST 2: AUTOMATED SUITE" }, 10.0)
+          .set("#video-title", { textContent: "PYTEST TEST SUITE (LOCAL RUNNER)" }, 10.0)
+          .set("#card-t-act4", { textContent: "42 AUTOMATED TESTS" }, 10.0)
+          .set("#card-d-act4", { textContent: "Every failure condition and network boundary is continuously exercised with mock destination adapters and strict assertions." }, 10.0)
+          .set("#card-c-act4", { textContent: "pytest tests/ -q\n================ 42 passed in 12.84s ================\nStatus: 100% GREEN" }, 10.0)
+          .from("#test-num", { scale: 0.8, color: "#000", duration: 0.4, ease: "back.out(2)" }, 10.5)
+          // Zoom into 42 passed test suite card at 12s
+          .to(cardSuite, {
+            scale: 1.25,
+            x: -25,
+            y: -15,
+            duration: 0.8,
+            ease: "power2.out"
+          }, 12.0)
+          .set("#caption-4", { textContent: "42 AUTOMATED TESTS PROVE RESILIENCE UNDER NETWORK FAULTS & MALICIOUS ATTACKS" }, 10.0);
 
         // Act 4 Exit
-        tl.to(".scene-container", { y: -40, opacity: 0, duration: 0.7, ease: "power2.in" }, 29.2);
+        tl.to(".scene-container", { y: -30, opacity: 0, duration: 0.5, ease: "power2.in" }, 19.4);
 
         window.__timelines["act4-retry"] = tl;
       </script>

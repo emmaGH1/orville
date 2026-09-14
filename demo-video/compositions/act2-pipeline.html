@@ -42,7 +42,7 @@
           inset: 0;
           display: flex;
           flex-direction: column;
-          padding: 36px 60px;
+          padding: 30px 60px;
           z-index: 5;
         }
 
@@ -50,11 +50,11 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 16px;
         }
 
         .title-block h2 {
-          font-size: 44px;
+          font-size: 38px;
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: -0.03em;
@@ -85,7 +85,7 @@
           position: relative;
           flex: 1;
           display: flex;
-          gap: 30px;
+          gap: 28px;
           align-items: stretch;
           min-height: 0;
         }
@@ -105,7 +105,7 @@
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 10px 18px;
+          padding: 8px 16px;
           background: #18181B;
           color: #FFF;
           border-bottom: 3px solid #000;
@@ -142,50 +142,67 @@
           width: 100%;
           height: 100%;
           object-fit: contain;
+          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .info-panel {
           flex: 1;
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 14px;
         }
 
         .card-elevated {
           border: 4px solid #000;
           background: #FFFFFF;
           box-shadow: 8px 8px 0 #000;
-          padding: 22px;
+          padding: 20px;
           position: relative;
+          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .card-title {
           font-family: "Inter", sans-serif;
           font-weight: 900;
           text-transform: uppercase;
-          font-size: 20px;
+          font-size: 18px;
           letter-spacing: -0.02em;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .card-body {
           font-family: "Space Grotesk", monospace;
-          font-size: 14px;
-          line-height: 1.5;
+          font-size: 13px;
+          line-height: 1.45;
           color: #222;
         }
 
         .code-block {
           background: #18181B;
           color: #4ADE80;
-          padding: 12px;
+          padding: 10px;
           border: 2px solid #000;
           font-family: "Space Grotesk", monospace;
-          font-size: 13px;
+          font-size: 12px;
           line-height: 1.4;
-          margin-top: 10px;
+          margin-top: 8px;
           white-space: pre-wrap;
           word-break: break-all;
+        }
+
+        .strands-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #18181B;
+          color: #C0F7FE;
+          border: 2px solid #000;
+          box-shadow: 3px 3px 0 #FE90E8;
+          padding: 4px 10px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 700;
+          font-size: 12px;
+          margin-bottom: 8px;
         }
 
         .badge-stamp {
@@ -195,22 +212,22 @@
           font-weight: 900;
           text-transform: uppercase;
           letter-spacing: 0.04em;
-          padding: 10px 18px;
-          font-size: 18px;
+          padding: 8px 16px;
+          font-size: 16px;
           z-index: 10;
         }
 
         .stamp-refused {
-          top: 30px;
-          right: 30px;
+          top: 24px;
+          right: 24px;
           background: #FE90E8;
           color: #000;
           transform: rotate(-4deg);
         }
 
         .stamp-matched {
-          top: 100px;
-          right: 30px;
+          top: 84px;
+          right: 24px;
           background: #F7CB46;
           color: #000;
           transform: rotate(3deg);
@@ -221,40 +238,40 @@
           left: 50%;
           transform: translate(-50%, -50%) rotate(-3deg);
           background: #F7CB46;
-          font-size: 32px;
-          padding: 16px 36px;
+          font-size: 28px;
+          padding: 14px 30px;
           box-shadow: 10px 10px 0 #000;
         }
 
         .check-grid {
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          margin-top: 10px;
+          gap: 8px;
+          margin-top: 8px;
         }
 
         .check-item {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
           border: 2px solid #000;
           background: #99E885;
-          padding: 8px 14px;
+          padding: 6px 12px;
           font-family: "Space Grotesk", monospace;
           font-weight: 700;
-          font-size: 13px;
+          font-size: 12px;
           box-shadow: 3px 3px 0 #000;
         }
 
         .caption-bar {
-          margin-top: 18px;
+          margin-top: 14px;
           background: #000;
           color: #FFF;
           border: 3px solid #FFF;
           box-shadow: 6px 6px 0 #F7CB46;
-          padding: 12px 28px;
+          padding: 10px 24px;
           font-weight: 800;
-          font-size: 20px;
+          font-size: 18px;
           text-transform: uppercase;
           letter-spacing: 0.04em;
           width: fit-content;
@@ -289,12 +306,12 @@
                 <span id="video-tag" style="color: #4ADE80;">LIVE CONNECTED PROOF</span>
               </div>
               <div class="video-box">
-                <!-- Videos with native HyperFrames timing -->
+                <!-- Videos with native HyperFrames timing (40s total) -->
                 <video
                   id="vid-fresh"
                   src="assets/video/02-fresh-run.mp4"
                   data-start="0"
-                  data-duration="22"
+                  data-duration="16"
                   data-hf-media-start-basis="local"
                   muted
                   playsinline
@@ -303,8 +320,8 @@
                 <video
                   id="vid-github"
                   src="assets/video/03-github.mp4"
-                  data-start="22"
-                  data-duration="13"
+                  data-start="16"
+                  data-duration="8"
                   data-hf-media-start-basis="local"
                   muted
                   playsinline
@@ -313,8 +330,8 @@
                 <video
                   id="vid-trello"
                   src="assets/video/04-trello.mp4"
-                  data-start="35"
-                  data-duration="12"
+                  data-start="24"
+                  data-duration="8"
                   data-hf-media-start-basis="local"
                   muted
                   playsinline
@@ -323,8 +340,8 @@
                 <video
                   id="vid-discord"
                   src="assets/video/05-discord.mp4"
-                  data-start="47"
-                  data-duration="13"
+                  data-start="32"
+                  data-duration="8"
                   data-hf-media-start-basis="local"
                   muted
                   playsinline
@@ -346,11 +363,14 @@
 
             <!-- Right: Dynamic Info Panel -->
             <div class="info-panel">
-              <!-- Card 1: Tool Dispatch -->
+              <!-- Card 1: Tool Dispatch with Strands Tag -->
               <div id="card-action" class="card-elevated">
+                <div class="strands-tag">
+                  ⚡ STRANDS SDK: <code>SequentialToolExecutor()</code>
+                </div>
                 <div id="action-title" class="card-title">GUARDED TOOL LOOP</div>
                 <div id="action-desc" class="card-body">
-                  Strands Agent loop evaluates input, calls candidate search, matches existing issue #1, and refuses the malicious deletion request.
+                  Strands Agent loop evaluates report, calls candidate search, matches existing issue #1, and refuses the malicious deletion request.
                 </div>
                 <div id="action-code" class="code-block">
 tools: [inspect_report, search_issues]
@@ -389,64 +409,92 @@ confidence: 0.98 -> Issue #1 matched
 
       <script>
         const tl = gsap.timeline({ paused: true });
+        const vidFresh = document.getElementById("vid-fresh");
+        const cardReceipts = document.getElementById("card-receipts");
 
-        // Phase 1: Terminal Execution (0s - 22s)
-        tl.from(".window-frame", { scale: 0.92, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.2)
-          .from(".info-panel", { x: 50, opacity: 0, duration: 0.7, ease: "power3.out" }, 0.4);
+        // Phase 1: Terminal Execution (0s - 16s)
+        tl.from(".window-frame", { scale: 0.94, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.1)
+          .from(".info-panel", { x: 40, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2);
 
-        // Deletion Refusal badge pops in at 4s
+        // Deletion Refusal badge pops in at 3.5s
         tl.fromTo("#badge-refused", 
           { scale: 0, opacity: 0, rotation: -20 }, 
-          { scale: 1, opacity: 1, rotation: -4, duration: 0.6, ease: "back.out(2)" }, 
-          4.0
+          { scale: 1, opacity: 1, rotation: -4, duration: 0.5, ease: "back.out(2)" }, 
+          3.5
         );
 
-        // Candidate search matched badge at 11s
+        // Dynamic Punch-in zoom onto terminal output at 4.5s
+        tl.to(vidFresh, {
+          scale: 1.35,
+          x: 40,
+          y: -30,
+          duration: 1.0,
+          ease: "power2.out"
+        }, 4.5);
+
+        // Candidate search matched badge at 8s
         tl.fromTo("#badge-matched", 
           { scale: 0, opacity: 0, rotation: 20 }, 
-          { scale: 1, opacity: 1, rotation: 3, duration: 0.6, ease: "back.out(2)" }, 
-          11.0
+          { scale: 1, opacity: 1, rotation: 3, duration: 0.5, ease: "back.out(2)" }, 
+          8.0
         );
 
-        // Phase 2: GitHub Destination (22s - 35s)
-        tl.to(["#badge-refused", "#badge-matched"], { opacity: 0, duration: 0.4 }, 21.5)
-          .set(["#badge-refused", "#badge-matched"], { display: "none" }, 22.0)
-          .set("#step-pill", { textContent: "DESTINATION 1: GITHUB" }, 22.0)
-          .set("#video-title", { textContent: "GITHUB ISSUE #1 — REAL COMMENT POSTED" }, 22.0)
-          .set("#action-title", { textContent: "1. GITHUB COMMENT RECORDED" }, 22.0)
-          .set("#action-desc", { textContent: "Posted comment to existing Issue #1 containing the report summary and deduplication marker [orville-report-id: HARBOR-STRANDS-05]." }, 22.0)
-          .set("#action-code", { textContent: "POST /repos/emmaGH1/orville/issues/1/comments\n-> Comment ID: 5661232219\n-> Marker anchored in body" }, 22.0)
-          .to("#chk-gh", { opacity: 1, duration: 0.4, scale: 1.04 }, 24.0)
-          .to("#chk-gh", { scale: 1.0, duration: 0.2 }, 24.5)
-          .set("#caption-bar-2", { textContent: "DESTINATION 1: COMMENT ATTACHED TO GITHUB ISSUE & INDEPENDENTLY READ BACK" }, 22.0);
+        // Zoom out vid-fresh back to normal at 14s
+        tl.to(vidFresh, {
+          scale: 1,
+          x: 0,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.inOut"
+        }, 14.0);
 
-        // Phase 3: Trello Destination (35s - 47s)
-        tl.set("#step-pill", { textContent: "DESTINATION 2: TRELLO" }, 35.0)
-          .set("#video-title", { textContent: "TRELLO BOARD — CUSTOMER FOLLOW-UP CARD" }, 35.0)
-          .set("#action-title", { textContent: "2. TRELLO CARD CREATED" }, 35.0)
-          .set("#action-desc", { textContent: "Customer follow-up card created in the specified list, embedding the verified GitHub comment URL for seamless team handoff." }, 35.0)
-          .set("#action-code", { textContent: "POST /cards\n-> Card ID: Tep5Jilu\n-> Link: github.com/emmaGH1/orville/issues/1#5661232219" }, 35.0)
-          .to("#chk-tr", { opacity: 1, duration: 0.4, scale: 1.04 }, 37.0)
-          .to("#chk-tr", { scale: 1.0, duration: 0.2 }, 37.5)
-          .set("#caption-bar-2", { textContent: "DESTINATION 2: TRELLO CARD CREATED WITH EMBEDDED GITHUB ISSUE LINK" }, 35.0);
+        // Phase 2: GitHub Destination (16s - 24s)
+        tl.to(["#badge-refused", "#badge-matched"], { opacity: 0, duration: 0.3 }, 15.5)
+          .set(["#badge-refused", "#badge-matched"], { display: "none" }, 16.0)
+          .set("#step-pill", { textContent: "DESTINATION 1: GITHUB" }, 16.0)
+          .set("#video-title", { textContent: "GITHUB ISSUE #1 — REAL COMMENT POSTED" }, 16.0)
+          .set("#action-title", { textContent: "1. GITHUB COMMENT RECORDED" }, 16.0)
+          .set("#action-desc", { textContent: "Posted comment to existing Issue #1 containing the report summary and deduplication marker [orville-report-id: HARBOR-STRANDS-05]." }, 16.0)
+          .set("#action-code", { textContent: "POST /repos/emmaGH1/orville/issues/1/comments\n-> Comment ID: 5661232219\n-> Marker anchored in body" }, 16.0)
+          .to("#chk-gh", { opacity: 1, duration: 0.4, scale: 1.04 }, 17.5)
+          .to("#chk-gh", { scale: 1.0, duration: 0.2 }, 18.0)
+          .set("#caption-bar-2", { textContent: "DESTINATION 1: COMMENT ATTACHED TO GITHUB ISSUE & INDEPENDENTLY READ BACK" }, 16.0);
 
-        // Phase 4: Discord Destination & Complete (47s - 60s)
-        tl.set("#step-pill", { textContent: "DESTINATION 3: DISCORD" }, 47.0)
-          .set("#video-title", { textContent: "DISCORD #ORVILLE-DEMO CHANNEL" }, 47.0)
-          .set("#action-title", { textContent: "3. DISCORD TEAM UPDATE" }, 47.0)
-          .set("#action-desc", { textContent: "Notification posted to Discord webhook with wait=true, returning message ID and linking to both GitHub and Trello records." }, 47.0)
-          .set("#action-code", { textContent: "POST /webhooks/.../?wait=true\n-> Message ID: 1548975043332284516\n-> Status: COMPLETE (All 3 readbacks verified)" }, 47.0)
-          .to("#chk-dc", { opacity: 1, duration: 0.4, scale: 1.04 }, 49.0)
-          .to("#chk-dc", { scale: 1.0, duration: 0.2 }, 49.5)
+        // Phase 3: Trello Destination (24s - 32s)
+        tl.set("#step-pill", { textContent: "DESTINATION 2: TRELLO" }, 24.0)
+          .set("#video-title", { textContent: "TRELLO BOARD — CUSTOMER FOLLOW-UP CARD" }, 24.0)
+          .set("#action-title", { textContent: "2. TRELLO CARD CREATED" }, 24.0)
+          .set("#action-desc", { textContent: "Customer follow-up card created in the specified list, embedding the verified GitHub comment URL for seamless team handoff." }, 24.0)
+          .set("#action-code", { textContent: "POST /cards\n-> Card ID: Tep5Jilu\n-> Link: github.com/emmaGH1/orville/issues/1#5661232219" }, 24.0)
+          .to("#chk-tr", { opacity: 1, duration: 0.4, scale: 1.04 }, 25.5)
+          .to("#chk-tr", { scale: 1.0, duration: 0.2 }, 26.0)
+          .set("#caption-bar-2", { textContent: "DESTINATION 2: TRELLO CARD CREATED WITH EMBEDDED GITHUB ISSUE LINK" }, 24.0);
+
+        // Phase 4: Discord Destination & Readbacks Zoom (32s - 40s)
+        tl.set("#step-pill", { textContent: "DESTINATION 3: DISCORD" }, 32.0)
+          .set("#video-title", { textContent: "DISCORD #ORVILLE-DEMO CHANNEL" }, 32.0)
+          .set("#action-title", { textContent: "3. DISCORD TEAM UPDATE" }, 32.0)
+          .set("#action-desc", { textContent: "Notification posted to Discord webhook with wait=true, returning message ID and linking to both GitHub and Trello records." }, 32.0)
+          .set("#action-code", { textContent: "POST /webhooks/.../?wait=true\n-> Message ID: 1548975043332284516\n-> Status: COMPLETE (All 3 readbacks verified)" }, 32.0)
+          .to("#chk-dc", { opacity: 1, duration: 0.4, scale: 1.04 }, 33.5)
+          .to("#chk-dc", { scale: 1.0, duration: 0.2 }, 34.0)
+          // Punch-in zoom onto readbacks checklist at 34s
+          .to(cardReceipts, {
+            scale: 1.25,
+            x: -25,
+            y: 10,
+            duration: 0.8,
+            ease: "power2.out"
+          }, 34.0)
           .fromTo("#badge-complete", 
             { scale: 0, opacity: 0, rotation: -15 }, 
-            { scale: 1, opacity: 1, rotation: -3, duration: 0.7, ease: "elastic.out(1, 0.4)" }, 
-            51.0
+            { scale: 1, opacity: 1, rotation: -3, duration: 0.6, ease: "elastic.out(1, 0.4)" }, 
+            35.5
           )
-          .set("#caption-bar-2", { textContent: "ALL 3 APPS VERIFIED VIA INDEPENDENT GET READBACKS BEFORE REPORTING COMPLETE" }, 47.0);
+          .set("#caption-bar-2", { textContent: "ALL 3 APPS VERIFIED VIA INDEPENDENT GET READBACKS BEFORE REPORTING COMPLETE" }, 32.0);
 
         // Act 2 Exit
-        tl.to(".scene-container", { y: -40, opacity: 0, duration: 0.7, ease: "power2.in" }, 59.2);
+        tl.to(".scene-container", { y: -30, opacity: 0, duration: 0.5, ease: "power2.in" }, 39.4);
 
         window.__timelines["act2-pipeline"] = tl;
       </script>
