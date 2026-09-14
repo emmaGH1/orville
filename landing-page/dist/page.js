@@ -2,7 +2,7 @@
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Hero entrance: rise, unblur, fade. Reduced-motion and no-JS visitors simply see the hero.
+// Hero entrance: rise and fade. Reduced-motion and no-JS visitors simply see the hero.
 const hero = document.querySelector('.hero');
 if (hero && !reducedMotion) {
   hero.classList.add('hero-enter');
@@ -20,6 +20,15 @@ if (!reducedMotion && 'IntersectionObserver' in window) {
     }
   }, { threshold: 0.15 });
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  // Fallback for engines that skip the initial observe() callback: reveal
+  // anything already inside the viewport shortly after load.
+  setTimeout(() => {
+    const vh = window.innerHeight;
+    document.querySelectorAll('.reveal:not(.revealed)').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.top < vh && r.bottom > 0) el.classList.add('revealed');
+    });
+  }, 600);
 } else {
   document.querySelectorAll('.reveal').forEach(el => el.classList.add('revealed'));
 }
@@ -52,4 +61,8 @@ if (statement && !reducedMotion && 'IntersectionObserver' in window) {
     }
   }, { threshold: 0.3 });
   statementObserver.observe(statement);
+  setTimeout(() => {
+    const r = statement.getBoundingClientRect();
+    if (r.top < window.innerHeight && r.bottom > 0) statement.classList.add('statement-visible');
+  }, 600);
 }
