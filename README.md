@@ -106,6 +106,10 @@ python scripts/verify_in_60s.py
 
 ## Architecture & Data Flow
 
+<div align="center">
+  <img src="architecture-diagram.png" alt="Orville Architecture Diagram" width="100%" />
+</div>
+
 ```mermaid
 flowchart TD
     subgraph Intake ["1. Untrusted Intake & Guard"]
