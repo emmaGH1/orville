@@ -1,4 +1,8 @@
 !dist/
 !dist/**
 .sites-runtime/
+.vercel/
 *.zip
+
+.vercel
+.env*

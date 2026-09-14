@@ -4,6 +4,8 @@ Orville turns one messy customer bug report into a coordinated, verified handoff
 
 The distinctive part is the guarding: Strands Agents chooses and calls a sequence of typed operations, while Python limits it to current GitHub candidate IDs, blocks ambiguous matches for a human, enforces GitHub → Trello → Discord order, and computes `complete` only after all three app states have been re-read. The model's own summary is never the proof.
 
+A recorded case study of one verified handoff (real app records, fictional report) is at **https://orville-tau.vercel.app/**.
+
 ## Try it as a judge
 
 The repository is currently private; request access to `emmaGH1/orville` from the repository owner before judging. Note that repository access alone does **not** grant access to the maintainer's private Trello board or Discord channel — the two-minute demo video (linked here once captured) shows the maintainer's real three-app states, and you can verify every claim yourself end-to-end by running Orville against your own test accounts:

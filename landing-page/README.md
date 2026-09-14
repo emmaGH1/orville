@@ -1,17 +1,14 @@
 # Orville static landing page
 
+Live at **https://orville-tau.vercel.app/** (Vercel, deployed September 14, 2026).
+
 The page explains a recorded Strands-driven support handoff using fictional customer input and real app records. It does not run the Python agent.
 
 Serve only `dist/` as the public root. No build step or application dependencies are required. Fonts are loaded from Google Fonts; font sources and licenses are documented in ASSETS.md.
 
 ## Vercel deployment
 
-Deploy `dist/` as a static site — no framework preset needed. Two equivalent options:
-
-- Dashboard: add the repository, set **Root Directory** to `landing-page`, leave the output as-is (`landing-page/dist` is committed), and deploy.
-- CLI: from `landing-page/`, run `npx vercel --prod` (Vercel serves `dist/` because of `vercel.json`).
-
-`vercel.json` sets the output directory to `dist` and enables clean URLs. `og.png` is served from the same origin as the page, so the Open Graph image reference no longer depends on the retired chatgpt.site host.
+The project (`orville`, scope `emmagh1s-projects`) is configured with **Root Directory = `landing-page`**, so Git-connected deployments build this directory directly. CLI uploads are already scoped to the linked directory and conflict with that setting: to redeploy by CLI, temporarily clear Root Directory in project settings, run `npx vercel --prod` from `landing-page/`, then restore it. The public production alias is `orville-tau.vercel.app` (the default `*-emmagh1s-projects.vercel.app` alias sits behind Vercel Authentication and is not publicly reachable).
 
 ## Review path
 
