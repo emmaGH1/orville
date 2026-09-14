@@ -112,7 +112,10 @@ def run(
     clients: dict | None = None,
     planner=None,
     trace: Trace | None = None,
+    stop_after: str = "discord",
 ) -> RunResult:
+    if stop_after not in {"github", "trello", "discord"}:
+        return RunResult({"status": "error", "reason": "invalid operation boundary"})
     if not report_id or not report_id.strip() or not report_text or not report_text.strip():
         return RunResult({"status": "error", "reason": "report_id and report text must be nonempty"})
     report_id = report_id.strip()
@@ -197,6 +200,19 @@ def run(
     apps = result["apps"]
     marker = _marker(report_id)
     gh_ver = tr_ver = dc_ver = False
+
+    def finish() -> RunResult:
+        if gh_ver:
+            result["allowed"].append("github_comment")
+        if tr_ver:
+            result["allowed"].append("trello_card")
+        if dc_ver:
+            result["allowed"].append("discord_status")
+        result["status"] = "complete" if (gh_ver and tr_ver and dc_ver) else "partial"
+        result["errors"] = [redact(e, secrets=secrets) for e in result["errors"]]
+        state.update(report_id, status=result["status"])
+        result["trace"] = trace.rendered()
+        return RunResult(result)
 
     # ---- GitHub ----------------------------------------------------------
     trace.planned("github_comment", cfg.github_repo)
@@ -386,6 +402,9 @@ def run(
             elif comment is None and not any("github" in e for e in result["errors"]):
                 result["errors"].append("github comment missing after write attempt")
 
+    if stop_after == "github":
+        return finish()
+
     # ---- Trello ----------------------------------------------------------
     trace.planned("trello_card", cfg.trello_list_id)
     gh_url = apps.get("github", {}).get("url") or prior_gh.get("html_url")
@@ -451,6 +470,9 @@ def run(
                     fail("trello", f"trello read-back failed (retryable): {e}")
                     apps["trello"] = {"id": card_id, "verified": False}
 
+    if stop_after == "trello":
+        return finish()
+
     # ---- Discord ---------------------------------------------------------
     trace.planned("discord_status", "configured webhook")
     dc = prior["discord"]
@@ -515,15 +537,4 @@ def run(
         trace.note("discord deferred: github and trello must both be verified before a status is posted")
         result["errors"].append("discord deferred because a required earlier step is not verified")
 
-    # ---- Status ----------------------------------------------------------
-    if gh_ver:
-        result["allowed"].append("github_comment")
-    if tr_ver:
-        result["allowed"].append("trello_card")
-    if dc_ver:
-        result["allowed"].append("discord_status")
-    result["status"] = "complete" if (gh_ver and tr_ver and dc_ver) else "partial"
-    result["errors"] = [redact(e, secrets=secrets) for e in result["errors"]]
-    state.update(report_id, status=result["status"])
-    result["trace"] = trace.rendered()
-    return RunResult(result)
+    return finish()
