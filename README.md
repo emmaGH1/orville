@@ -1,8 +1,8 @@
-# Orville — guarded support handoff
+# Orville — guarded Strands support handoff
 
 Orville turns one messy customer bug report into a coordinated, verified handoff for a small software team: it routes the report to the correct existing GitHub issue (or creates one), records exactly one linked customer follow-up card in Trello, and posts one status message to Discord with links to both records. Every write is independently read back before Orville claims success, and the report itself is treated as untrusted data — requests to delete or modify unrelated records are refused, never executed.
 
-The distinctive part is the guarding: the model may only choose among issue IDs returned by the GitHub API, ambiguous matches stop for a human before any write, every write carries an idempotency marker keyed by a stable `report_id`, and `complete` is reported only after all three app states have been re-read from the apps themselves — not from the model's own summary.
+The distinctive part is the guarding: Strands Agents chooses and calls a sequence of typed operations, while Python limits it to current GitHub candidate IDs, blocks ambiguous matches for a human, enforces GitHub → Trello → Discord order, and computes `complete` only after all three app states have been re-read. The model's own summary is never the proof.
 
 ## Try it as a judge
 
@@ -22,29 +22,44 @@ The repository is currently private; request access to `emmaGH1/orville` from th
 
 3. **Action — one command, one report:**
    ```bash
-   .venv\Scripts\python -m orville run --report-id HARBOR-EXPORT-01 --text-file eval/reports/harbor_export_01.txt
+   .venv\Scripts\python -m orville run-strands --report-id HARBOR-STRANDS-04 --text-file eval/reports/harbor_strands_04.txt --only-existing-issue 1
    ```
-   The sample report matches the seeded CSV-export issue, includes an unrelated deletion request, and is a fictional customer scenario. The run makes three real writes to the three apps you configured.
+   The sample report is fictional, matches the seeded CSV-export issue, and includes an unrelated deletion request. `--only-existing-issue 1` is a safe demo scope: it blocks a new issue or any other issue before writing. The run makes three real writes to the three apps you configured.
 
-4. **Expected result:** JSON with `"status": "complete"`, a `refused` entry for the deletion request, and one verified GitHub comment, one Trello card, and one Discord message ID — three writes across three apps for the route-to-existing-issue path. The trace lines show planned actions, real API outcomes, and three `READBACK ... ok=True` lines — the model's summary is never the proof. In a repository with no matching issue (e.g., your own empty test repo), Orville instead creates a new issue, comments on it, and continues: the create-new-issue path performs **four** writes across the same three apps (issue, comment, card, message), and the status is still `complete` once all four read back.
+4. **Expected result:** JSON with `"status": "complete"`, a `refused` entry for the deletion request, and one verified GitHub comment, Trello card, and Discord message ID. The `tool_events` show the Strands-controlled sequence: inspect candidates → select issue → GitHub → Trello → Discord. The trace then shows independent read-backs. A model cannot turn a prose claim into completion.
 
-5. **Verification:** open the printed GitHub comment URL, Trello card URL, and check the Discord channel: the comment sits on the matching issue, the card is in the configured list and contains the GitHub link, and the Discord message contains both links. Then re-run the exact same command: the output reuses the same three IDs (`reused comment/card/message`) and creates nothing new.
+5. **Verification:** open the printed GitHub comment URL, Trello card URL, and check the Discord channel: the comment sits on the matching issue, the card is in the configured list and contains the GitHub link, and the Discord message contains both links. Then re-run the exact same command: the output reuses the same three IDs and creates nothing new.
 
-6. **Failure behavior (tested):** an ambiguous match stops as `"needs_human"` before any write; a failed or incomplete duplicate-check read blocks the write (`partial` with a retryable reason); a Discord send whose outcome is unknown — lost response or 5xx server error — is marked `uncertain` and is never reposted automatically; a lost GitHub comment response reconciles the same recorded issue instead of replanning; a retry after an interrupted GitHub issue creation verifies the recorded issue instead of creating another; reusing a `report_id` with changed report text or destinations is rejected before any write; re-running a completed report creates no duplicates. All of these are covered by `python -m pytest tests/ -q` (32 tests, local fakes only).
+6. **Failure behavior (tested):** an ambiguous match persists a limited human-choice review; `resume-strands` rechecks the chosen candidate and the immutable report/destination binding before continuing. A Discord-first tool call, fabricated issue ID, changed input, or out-of-scope create-new decision makes zero writes. Unknown Discord or GitHub outcomes pause for manual reconciliation and are never reposted automatically. Re-running a completed report reuses records. These checks are covered by `python -m pytest tests/ -q` (41 local-fake tests).
 
 ## How it works
 
-- **Planner:** a Groq structured-output call classifies the report and selects only among candidate issue IDs fetched from the GitHub API, or `create_new`; Python validates the choice (fabricated IDs and low confidence become `needs_human`).
+```mermaid
+flowchart LR
+  R[Customer report] --> S[Strands Agent]
+  S --> I[Inspect current GitHub candidates]
+  I --> C{Validated choice?}
+  C -->|ambiguous| H[Persist human review]
+  C -->|clear| G[Guarded GitHub operation]
+  G --> T[Guarded Trello operation]
+  T --> D[Guarded Discord operation]
+  D --> V[Independent app read-backs]
+  V --> O[Verified complete or partial]
+```
+
+- **Strands orchestration:** a real Strands `Agent` uses typed tools and a sequential executor to inspect candidates, make a validated choice, call each guarded operation, and consume returned results. Invocation and tool-call budgets bound the loop; a single continuation is allowed for an incomplete safe run.
 - **Guard:** deletion/close/unrelated-modification phrases in the report are recorded as refused; the execution layer exposes no such operations, so they cannot be routed anywhere.
 - **Runner:** fixed write order GitHub → Trello → Discord; each write persists its returned ID immediately to ignored local state (`state/runs.json`, the retry key is `report_id`); each write is followed by an independent read-back that checks ID, destination, marker, and cross-links (the Trello card must contain the verified GitHub link; the Discord message must contain both verified links). Later steps are deferred until the records they link are verified, so the status message can never falsely claim an unverified step succeeded. A `report_id` is bound to one immutable report and one destination scope (repo, list, webhook): reusing an ID with different text or destinations is rejected before any write, and pre-binding local entries are migrated only after the submitted text is verified against the recorded app content.
 
 ## Reliability and limitations (honest)
 
-- **Verified:** one live end-to-end run per path (route-to-existing-issue and create-new-issue) returned `complete` with all writes independently read back; a re-run reused all records. 32 tests pass locally using in-memory fakes for failure paths (failed duplicate checks, trello outage retry, lost Discord response, 5xx ambiguity, unreadable new issue, interrupted issue creation with lost response outside the bounded search, lost comment response reconciling the same issue, paged marker search, duplicate markers, changed report/destination rejection, legacy migration, model outage, malformed model response).
+- **Verified:** a fresh connected Strands run for the fictional `HARBOR-STRANDS-04` report selected existing issue #1, wrote and read back one GitHub comment, Trello card, and Discord message. Its same-ID retry independently read back the same three records. 41 tests pass locally using in-memory fakes for failure paths, operation ordering, false model completion, human-choice resume, changed input, and connected-scope blocking.
 - **Simulation:** the failure-path tests use stateful fakes, not the real apps, and they exercise orchestration logic only — they are **not** evaluations of model accuracy; no accuracy percentage is claimed anywhere. The live evidence covers the happy path and duplicate-retry, not every failure mode. The model's self-reported confidence is treated as an untrusted signal gated by code validation, not as calibrated accuracy.
-- **Known limits:** GitHub candidate and comment searches are bounded (first 20 open issues; comments paginated up to 1000 per issue) — beyond those windows, matches may be missed and, for comment dedupe, Orville withholds writes rather than risk a duplicate when absence cannot be proven. Duplicate recovery for GitHub/Trello relies on app-side markers plus local state; if local state is lost and the app search also fails, Orville fails closed rather than risk a duplicate. An uncertain GitHub issue creation that cannot be confirmed within the bounded search stays `uncertain` (run remains `partial`) until a human reconciles — it is never recreated automatically. A Discord send whose outcome is unknown (lost response or 5xx server error) is never retried automatically — it stays `uncertain` until a human reconciles; there is **no universal exactly-once guarantee**, especially after local state loss. One `report_id` means one immutable report bound to one destination scope; changed input or configuration with the same ID stops at `needs_human`. Marker checks assume no one edits Orville's records between runs. State is a single-process local JSON file with no locking or job queue — Orville is a scoped CLI demo, not multi-user production software; run one report at a time.
+- **Known limits:** Groq emits repeated `reasoningContent is not supported in multi-turn conversations with the Chat Completions API` warnings with this Strands/OpenAI-compatible path, although the connected tool loop and read-backs completed. GitHub candidate and comment searches are bounded (first 20 open issues; comments paginated up to 1000 per issue). An unknown GitHub or Discord outcome pauses for manual reconciliation rather than a blind retry. One `report_id` binds immutable report text and destination scope. State is a single-process local JSON file; run one report at a time.
 - The two-minute demo video (to be linked here once captured) will show the maintainer's real app states (private GitHub repository, Trello board, Discord channel); it does not exist yet, and no submission claim depends on it until it does. All sample data is fictional and labeled in the repositories. Judges without maintainer app access can reproduce every result against their own configured apps using the steps above.
 
 ## Credits
 
-Built for the Multi-App Agent Hackathon, September 13, 2026. Runtime model: `openai/gpt-oss-120b` served by Groq (free plan), called through the OpenAI Python SDK. Apps: GitHub REST API, Trello REST API, Discord webhooks (via `httpx`). Development used AI coding assistants for implementation and independent review. Everything else is original code in this repository.
+Built for Agents for Humans, September 2026. Runtime: Strands Agents with `openai/gpt-oss-120b` served by Groq through its OpenAI-compatible endpoint. Apps: GitHub REST API, Trello REST API, Discord webhooks (via `httpx`). Development used AI coding assistants for implementation and review. Everything else is original code in this repository.
+
+Released under the [MIT License](LICENSE).
