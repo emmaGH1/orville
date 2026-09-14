@@ -208,7 +208,10 @@ def run_strands(report_id: str, report_text: str, cfg: Config, clients: dict,
         """
         if not enter("request_human_review"):
             return {"status": "blocked"}
-        pause(reason)
+        # Before a validated selection the open question is which candidate
+        # issue to use, so the operator issue-choice resume path applies.
+        pause(reason, kind="candidate_choice" if selected is None and candidates is not None
+                        else "manual_reconcile")
         events.append({"tool": "request_human_review", "status": "needs_human"})
         return {"status": "needs_human", "reason": review_reason}
 

@@ -95,6 +95,31 @@ def test_ambiguous_choice_persists_review_without_app_write(tmp_path, monkeypatc
     assert not clients["trello"].cards and not clients["discord"].messages
 
 
+def test_request_human_review_before_selection_is_resumable(tmp_path, monkeypatch):
+    monkeypatch.setattr(runtime, "tool", lambda fn: fn)
+    monkeypatch.setattr(runtime, "Agent", ScriptedAgent)
+    ScriptedAgent.calls = [
+        "inspect_report_context",
+        ("request_human_review", {"reason": "two plausible existing issues, no clear ruling"}),
+    ]
+    cfg = make_cfg(tmp_path)
+    clients = fresh_clients()
+    result = runtime.run_strands("AMBIG-STRANDS-2", HARBOR_REPORT, cfg, clients, model=object())
+    assert result["status"] == "needs_human"
+    review = RunState(cfg.state_dir).get("AMBIG-STRANDS-2")["review"]
+    assert review["kind"] == "candidate_choice"
+    assert review["candidate_numbers"] == [1, 2]
+    assert not clients["github"].comments[1]
+    assert not clients["trello"].cards and not clients["discord"].messages
+
+    ScriptedAgent.calls = ["record_engineering_handoff", "create_customer_followup",
+                           "publish_team_update"]
+    resumed = runtime.run_strands("AMBIG-STRANDS-2", HARBOR_REPORT, cfg, clients,
+                                  model=object(), review_issue_number=1)
+    assert resumed["status"] == "complete"
+    assert len(clients["github"].comments[1]) == len(clients["trello"].cards) == len(clients["discord"].messages) == 1
+
+
 def test_connected_scope_blocks_create_new_before_write(tmp_path, monkeypatch):
     monkeypatch.setattr(runtime, "tool", lambda fn: fn)
     monkeypatch.setattr(runtime, "Agent", ScriptedAgent)
