@@ -127,6 +127,30 @@
           border: 1.5px solid #000;
         }
 
+        .header-status-slot {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        /* Non-occluding docked pills in window header */
+        .docked-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border: 2px solid #000;
+          padding: 3px 10px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 800;
+          font-size: 11px;
+          text-transform: uppercase;
+          box-shadow: 2px 2px 0 #000;
+        }
+
+        .docked-pill-pink { background: #FE90E8; color: #000; }
+        .docked-pill-yellow { background: #F7CB46; color: #000; }
+        .docked-pill-green { background: #99E885; color: #000; }
+
         .video-box {
           position: relative;
           width: 100%;
@@ -142,7 +166,6 @@
           width: 100%;
           height: 100%;
           object-fit: contain;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .info-panel {
@@ -158,7 +181,6 @@
           box-shadow: 8px 8px 0 #000;
           padding: 20px;
           position: relative;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .card-title {
@@ -180,11 +202,11 @@
         .code-block {
           background: #18181B;
           color: #4ADE80;
-          padding: 10px;
+          padding: 12px;
           border: 2px solid #000;
           font-family: "Space Grotesk", monospace;
           font-size: 12px;
-          line-height: 1.4;
+          line-height: 1.45;
           margin-top: 8px;
           white-space: pre-wrap;
           word-break: break-all;
@@ -205,44 +227,6 @@
           margin-bottom: 8px;
         }
 
-        .badge-stamp {
-          position: absolute;
-          border: 4px solid #000;
-          box-shadow: 6px 6px 0 #000;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          padding: 8px 16px;
-          font-size: 16px;
-          z-index: 10;
-        }
-
-        .stamp-refused {
-          top: 24px;
-          right: 24px;
-          background: #FE90E8;
-          color: #000;
-          transform: rotate(-4deg);
-        }
-
-        .stamp-matched {
-          top: 84px;
-          right: 24px;
-          background: #F7CB46;
-          color: #000;
-          transform: rotate(3deg);
-        }
-
-        .stamp-complete {
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-3deg);
-          background: #F7CB46;
-          font-size: 28px;
-          padding: 14px 30px;
-          box-shadow: 10px 10px 0 #000;
-        }
-
         .check-grid {
           display: flex;
           flex-direction: column;
@@ -256,7 +240,7 @@
           gap: 8px;
           border: 2px solid #000;
           background: #99E885;
-          padding: 6px 12px;
+          padding: 7px 12px;
           font-family: "Space Grotesk", monospace;
           font-weight: 700;
           font-size: 12px;
@@ -294,7 +278,7 @@
 
           <!-- Main Stage Box -->
           <div class="stage-box">
-            <!-- Left: Video Window Frame -->
+            <!-- Left: Video Window Frame (Broadcast Steady - No Punch-in Zooms) -->
             <div class="window-frame">
               <div class="window-header">
                 <div class="window-dots">
@@ -303,7 +287,13 @@
                   <div class="dot" style="background: #27C93F;"></div>
                 </div>
                 <span id="video-title">ORVILLE RUN-STRANDS TERMINAL</span>
-                <span id="video-tag" style="color: #4ADE80;">LIVE CONNECTED PROOF</span>
+                <div class="header-status-slot">
+                  <!-- Docked Badges — Always visible in header, never occluding terminal lines -->
+                  <span id="pill-refused" class="docked-pill docked-pill-pink" style="display: none;">🛑 DELETION REFUSED</span>
+                  <span id="pill-matched" class="docked-pill docked-pill-yellow" style="display: none;">🔍 ISSUE #1 MATCHED</span>
+                  <span id="pill-complete" class="docked-pill docked-pill-green" style="display: none;">🏆 3/3 APPS VERIFIED</span>
+                  <span id="video-tag" style="color: #4ADE80;">LIVE CONNECTED</span>
+                </div>
               </div>
               <div class="video-box">
                 <!-- Videos with native HyperFrames timing (40s total) -->
@@ -347,17 +337,6 @@
                   playsinline
                   style="position: absolute; inset: 0;"
                 ></video>
-
-                <!-- Badges over video -->
-                <div id="badge-refused" class="badge-stamp stamp-refused" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
-                  🛑 SAFETY: DELETION REFUSED
-                </div>
-                <div id="badge-matched" class="badge-stamp stamp-matched" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
-                  🔍 ISSUE #1 MATCHED (0.98 CONFIDENCE)
-                </div>
-                <div id="badge-complete" class="badge-stamp stamp-complete" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
-                  🏆 STATUS: COMPLETE (3/3 APPS VERIFIED)
-                </div>
               </div>
             </div>
 
@@ -409,48 +388,30 @@ confidence: 0.98 -> Issue #1 matched
 
       <script>
         const tl = gsap.timeline({ paused: true });
-        const vidFresh = document.getElementById("vid-fresh");
-        const cardReceipts = document.getElementById("card-receipts");
 
-        // Phase 1: Terminal Execution (0s - 16s)
-        tl.from(".window-frame", { scale: 0.94, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.1)
-          .from(".info-panel", { x: 40, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2);
+        // Phase 1: Terminal Execution (0s - 16s) — Staggered entrance
+        tl.from(".window-frame", { scale: 0.96, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.1)
+          .from(".info-panel", { x: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2);
 
-        // Deletion Refusal badge pops in at 3.5s
-        tl.fromTo("#badge-refused", 
-          { scale: 0, opacity: 0, rotation: -20 }, 
-          { scale: 1, opacity: 1, rotation: -4, duration: 0.5, ease: "back.out(2)" }, 
-          3.5
-        );
+        // Deletion Refusal pill pops in window header at 3.5s (Zero terminal occlusion)
+        tl.set("#pill-refused", { display: "inline-flex" }, 3.5)
+          .fromTo("#pill-refused",
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" },
+            3.5
+          );
 
-        // Dynamic Punch-in zoom onto terminal output at 4.5s
-        tl.to(vidFresh, {
-          scale: 1.35,
-          x: 40,
-          y: -30,
-          duration: 1.0,
-          ease: "power2.out"
-        }, 4.5);
-
-        // Candidate search matched badge at 8s
-        tl.fromTo("#badge-matched", 
-          { scale: 0, opacity: 0, rotation: 20 }, 
-          { scale: 1, opacity: 1, rotation: 3, duration: 0.5, ease: "back.out(2)" }, 
-          8.0
-        );
-
-        // Zoom out vid-fresh back to normal at 14s
-        tl.to(vidFresh, {
-          scale: 1,
-          x: 0,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.inOut"
-        }, 14.0);
+        // Candidate search matched pill pops in header at 8.0s
+        tl.set("#pill-matched", { display: "inline-flex" }, 8.0)
+          .fromTo("#pill-matched",
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" },
+            8.0
+          );
 
         // Phase 2: GitHub Destination (16s - 24s)
-        tl.to(["#badge-refused", "#badge-matched"], { opacity: 0, duration: 0.3 }, 15.5)
-          .set(["#badge-refused", "#badge-matched"], { display: "none" }, 16.0)
+        tl.to(["#pill-refused", "#pill-matched"], { opacity: 0, duration: 0.3 }, 15.5)
+          .set(["#pill-refused", "#pill-matched"], { display: "none" }, 16.0)
           .set("#step-pill", { textContent: "DESTINATION 1: GITHUB" }, 16.0)
           .set("#video-title", { textContent: "GITHUB ISSUE #1 — REAL COMMENT POSTED" }, 16.0)
           .set("#action-title", { textContent: "1. GITHUB COMMENT RECORDED" }, 16.0)
@@ -470,7 +431,7 @@ confidence: 0.98 -> Issue #1 matched
           .to("#chk-tr", { scale: 1.0, duration: 0.2 }, 26.0)
           .set("#caption-bar-2", { textContent: "DESTINATION 2: TRELLO CARD CREATED WITH EMBEDDED GITHUB ISSUE LINK" }, 24.0);
 
-        // Phase 4: Discord Destination & Readbacks Zoom (32s - 40s)
+        // Phase 4: Discord Destination & Verified Proof (32s - 40s)
         tl.set("#step-pill", { textContent: "DESTINATION 3: DISCORD" }, 32.0)
           .set("#video-title", { textContent: "DISCORD #ORVILLE-DEMO CHANNEL" }, 32.0)
           .set("#action-title", { textContent: "3. DISCORD TEAM UPDATE" }, 32.0)
@@ -478,23 +439,17 @@ confidence: 0.98 -> Issue #1 matched
           .set("#action-code", { textContent: "POST /webhooks/.../?wait=true\n-> Message ID: 1548975043332284516\n-> Status: COMPLETE (All 3 readbacks verified)" }, 32.0)
           .to("#chk-dc", { opacity: 1, duration: 0.4, scale: 1.04 }, 33.5)
           .to("#chk-dc", { scale: 1.0, duration: 0.2 }, 34.0)
-          // Punch-in zoom onto readbacks checklist at 34s
-          .to(cardReceipts, {
-            scale: 1.25,
-            x: -25,
-            y: 10,
-            duration: 0.8,
-            ease: "power2.out"
-          }, 34.0)
-          .fromTo("#badge-complete", 
-            { scale: 0, opacity: 0, rotation: -15 }, 
-            { scale: 1, opacity: 1, rotation: -3, duration: 0.6, ease: "elastic.out(1, 0.4)" }, 
-            35.5
+          // Docked complete badge pops in header cleanly at 34.5s
+          .set("#pill-complete", { display: "inline-flex" }, 34.5)
+          .fromTo("#pill-complete",
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)" },
+            34.5
           )
           .set("#caption-bar-2", { textContent: "ALL 3 APPS VERIFIED VIA INDEPENDENT GET READBACKS BEFORE REPORTING COMPLETE" }, 32.0);
 
         // Act 2 Exit
-        tl.to(".scene-container", { y: -30, opacity: 0, duration: 0.5, ease: "power2.in" }, 39.4);
+        tl.to(".scene-container", { y: -25, opacity: 0, duration: 0.5, ease: "power2.in" }, 39.4);
 
         window.__timelines["act2-pipeline"] = tl;
       </script>

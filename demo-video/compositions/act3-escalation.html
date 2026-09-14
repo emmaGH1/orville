@@ -99,13 +99,19 @@
           position: relative;
         }
 
+        .card-header-line {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+        }
+
         .card-title {
           font-family: "Inter", sans-serif;
           font-weight: 900;
-          font-size: 20px;
+          font-size: 19px;
           text-transform: uppercase;
           letter-spacing: -0.02em;
-          margin-bottom: 10px;
         }
 
         .card-desc {
@@ -116,13 +122,27 @@
           margin-bottom: 14px;
         }
 
+        .docked-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border: 2px solid #000;
+          padding: 3px 12px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 800;
+          font-size: 12px;
+          text-transform: uppercase;
+          box-shadow: 2px 2px 0 #000;
+        }
+
+        .docked-pill-yellow { background: #F7CB46; color: #000; }
+
         .zero-box {
           border: 3px solid #000;
           background: #FFFDF5;
-          padding: 16px;
+          padding: 18px;
           margin-top: auto;
           box-shadow: 4px 4px 0 #000;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .zero-title {
@@ -132,7 +152,7 @@
           text-transform: uppercase;
           letter-spacing: 0.08em;
           color: #666;
-          margin-bottom: 10px;
+          margin-bottom: 12px;
         }
 
         .zero-stats {
@@ -144,16 +164,17 @@
         .stat-badge {
           border: 2px solid #000;
           background: #FEE2E2;
-          padding: 8px;
+          padding: 10px;
           text-align: center;
           font-family: "Space Grotesk", monospace;
           font-weight: 700;
           font-size: 12px;
+          box-shadow: 2px 2px 0 #000;
         }
 
         .stat-badge strong {
           display: block;
-          font-size: 24px;
+          font-size: 26px;
           color: #DC2626;
         }
 
@@ -180,7 +201,7 @@
         }
 
         .review-body {
-          padding: 20px;
+          padding: 22px;
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -204,10 +225,12 @@
         .btn-select {
           border: 2px solid #000;
           background: #F7CB46;
-          padding: 6px 14px;
+          padding: 7px 16px;
           font-size: 12px;
           font-weight: 800;
           text-transform: uppercase;
+          cursor: pointer;
+          box-shadow: 2px 2px 0 #000;
         }
 
         .resume-badge {
@@ -221,25 +244,6 @@
           text-align: center;
           margin-top: 10px;
           box-shadow: 4px 4px 0 #000;
-        }
-
-        .badge-stamp {
-          position: absolute;
-          border: 4px solid #000;
-          box-shadow: 6px 6px 0 #000;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          padding: 10px 20px;
-          font-size: 18px;
-          z-index: 10;
-        }
-
-        .stamp-needs-human {
-          top: 220px;
-          right: 20px;
-          background: #F7CB46;
-          transform: rotate(-3deg);
         }
 
         .caption-bar {
@@ -275,7 +279,13 @@
           <div class="content-grid">
             <!-- Left: Ambiguity & Zero Writes Card -->
             <div class="card-elevated">
-              <div class="card-title">CONFIDENCE DIVIDED BETWEEN 2 CANDIDATES</div>
+              <div class="card-header-line">
+                <div class="card-title">CONFIDENCE DIVIDED (2 CANDIDATES)</div>
+                <!-- Docked status badge in card header — Zero occlusion -->
+                <div id="docked-human-pill" class="docked-pill docked-pill-yellow" style="opacity: 0;">
+                  ⚠️ NEEDS_HUMAN · 0 WRITES
+                </div>
+              </div>
               <div class="card-desc">
                 When a customer bug report could plausibly match multiple open issues, generic agents guess and corrupt project tracking. Orville enforces a hard stop:
               </div>
@@ -286,24 +296,19 @@ candidates_found: [Issue #1, Issue #2]
 action: "HALT EXECUTION — ZERO WRITES"
               </div>
 
-              <!-- Stamp -->
-              <div id="badge-human" class="badge-stamp stamp-needs-human" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
-                ⚠️ NEEDS_HUMAN · 0 WRITES PERFORMED
-              </div>
-
-              <!-- Zero Writes Box -->
+              <!-- Zero Writes Box (Broadcast Steady - No Camera Zoom) -->
               <div id="zero-writes-card" class="zero-box">
                 <div class="zero-title">OBSERVED WRITES BEFORE OPERATOR APPROVAL:</div>
                 <div class="zero-stats">
-                  <div class="stat-badge">
+                  <div id="stat-1" class="stat-badge">
                     <strong>0</strong>
                     <span>GITHUB WRITES</span>
                   </div>
-                  <div class="stat-badge">
+                  <div id="stat-2" class="stat-badge">
                     <strong>0</strong>
                     <span>TRELLO CARDS</span>
                   </div>
-                  <div class="stat-badge">
+                  <div id="stat-3" class="stat-badge">
                     <strong>0</strong>
                     <span>DISCORD POSTS</span>
                   </div>
@@ -360,44 +365,37 @@ action: "HALT EXECUTION — ZERO WRITES"
 
       <script>
         const tl = gsap.timeline({ paused: true });
-        const zeroBox = document.getElementById("zero-writes-card");
+        const dockedHumanPill = document.getElementById("docked-human-pill");
 
         // Entrance
-        tl.from(".content-grid", { scale: 0.94, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.1);
+        tl.from(".content-grid", { scale: 0.96, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.1);
 
-        // Badge pops at 2.5s
-        tl.fromTo("#badge-human", 
-          { scale: 0, opacity: 0, rotation: -15 }, 
-          { scale: 1, opacity: 1, rotation: -3, duration: 0.5, ease: "back.out(2)" }, 
+        // Docked badge pops at 2.5s in card header (Zero text occlusion)
+        tl.fromTo(dockedHumanPill,
+          { scale: 0, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" },
           2.5
         );
 
-        // Punch-in zoom onto Zero-Writes box at 3.5s
-        tl.to(zeroBox, {
-          scale: 1.35,
-          y: -25,
-          duration: 0.8,
-          ease: "power2.out"
-        }, 3.5);
+        // Snappy motion accent on the zero-stats boxes at 3.5s (Steady frame, no camera zoom)
+        tl.fromTo(["#stat-1", "#stat-2", "#stat-3"],
+          { scale: 0.95 },
+          { scale: 1.05, duration: 0.25, stagger: 0.1, yoyo: true, repeat: 1, ease: "power2.out" },
+          3.5
+        );
 
-        // Zoom out zeroBox at 9s
-        tl.to(zeroBox, {
-          scale: 1,
-          y: 0,
-          duration: 0.6,
-          ease: "power2.inOut"
-        }, 9.0);
-
-        // Operator selects candidate #2 at 11s
-        tl.to("#opt-2", { background: "#C0F7FE", borderColor: "#000", scale: 1.03, duration: 0.3 }, 11.0)
-          .set("#btn-opt2", { textContent: "CLICKED ✓", background: "#99E885" }, 11.3)
-          .to("#resume-box", { opacity: 1, y: 0, duration: 0.4 }, 12.0)
-          .to("#resume-details", { opacity: 1, duration: 0.4 }, 12.8)
-          .set("#status-pill", { textContent: "STATUS: RESUMED & COMPLETE", background: "#99E885" }, 13.0)
-          .set("#review-tag", { textContent: "RESOLVED", color: "#22C55E" }, 13.0);
+        // Operator selects candidate #2 at 11s — Snappy button press
+        tl.to("#btn-opt2", { scale: 0.92, duration: 0.12, ease: "power2.in" }, 11.0)
+          .set("#btn-opt2", { textContent: "CLICKED ✓", background: "#99E885" }, 11.15)
+          .to("#btn-opt2", { scale: 1.0, duration: 0.2, ease: "back.out(2)" }, 11.15)
+          .to("#opt-2", { background: "#C0F7FE", borderColor: "#000", duration: 0.3 }, 11.2)
+          .fromTo("#resume-box", { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.45, ease: "back.out(1.5)" }, 11.8)
+          .to("#resume-details", { opacity: 1, duration: 0.4 }, 12.6)
+          .set("#status-pill", { textContent: "STATUS: RESUMED & COMPLETE", background: "#99E885" }, 12.8)
+          .set("#review-tag", { textContent: "RESOLVED", color: "#22C55E" }, 12.8);
 
         // Exit at 24.2s
-        tl.to(".scene-container", { y: -30, opacity: 0, duration: 0.5, ease: "power2.in" }, 24.2);
+        tl.to(".scene-container", { y: -25, opacity: 0, duration: 0.5, ease: "power2.in" }, 24.2);
 
         window.__timelines["act3-escalation"] = tl;
       </script>

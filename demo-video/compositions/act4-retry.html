@@ -125,6 +125,21 @@
           border: 1.5px solid #000;
         }
 
+        .docked-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border: 2px solid #000;
+          padding: 3px 10px;
+          font-family: "Space Grotesk", monospace;
+          font-weight: 800;
+          font-size: 11px;
+          text-transform: uppercase;
+          box-shadow: 2px 2px 0 #000;
+        }
+
+        .docked-pill-yellow { background: #F7CB46; color: #000; }
+
         .video-box {
           position: relative;
           width: 100%;
@@ -140,7 +155,6 @@
           width: 100%;
           height: 100%;
           object-fit: contain;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .info-panel {
@@ -156,7 +170,6 @@
           box-shadow: 8px 8px 0 #000;
           padding: 20px;
           position: relative;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .card-title {
@@ -217,26 +230,6 @@
           box-shadow: 2px 2px 0 #000;
         }
 
-        .badge-stamp {
-          position: absolute;
-          border: 4px solid #000;
-          box-shadow: 6px 6px 0 #000;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          padding: 8px 16px;
-          font-size: 16px;
-          z-index: 10;
-        }
-
-        .stamp-zero-dupes {
-          top: 24px;
-          right: 24px;
-          background: #F7CB46;
-          color: #000;
-          transform: rotate(-3deg);
-        }
-
         .caption-bar {
           margin-top: 14px;
           background: #000;
@@ -266,7 +259,7 @@
           </div>
 
           <div class="stage-box">
-            <!-- Left: Video Window -->
+            <!-- Left: Video Window (Steady broadcast frame — no zooms) -->
             <div class="window-frame">
               <div class="window-header">
                 <div class="window-dots">
@@ -275,7 +268,11 @@
                   <div class="dot" style="background: #27C93F;"></div>
                 </div>
                 <span id="video-title">ORVILLE RETRY — SAME REPORT ID</span>
-                <span style="color: #4ADE80;">ZERO DUPLICATES</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <!-- Docked badge inside header — never covers terminal lines -->
+                  <span id="badge-dupes" class="docked-pill docked-pill-yellow" style="opacity: 0;">⚡ ZERO DUPLICATES</span>
+                  <span style="color: #4ADE80;">LIVE CONNECTED</span>
+                </div>
               </div>
               <div class="video-box">
                 <video
@@ -298,10 +295,6 @@
                   playsinline
                   style="position: absolute; inset: 0;"
                 ></video>
-
-                <div id="badge-dupes" class="badge-stamp stamp-zero-dupes" data-layout-allow-overlap="true" data-layout-allow-occlusion="true" style="opacity: 0;">
-                  ⚡ ZERO DUPLICATE RECORDS CREATED
-                </div>
               </div>
             </div>
 
@@ -329,9 +322,9 @@
                   <div style="font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 14px; color: #166534;">PASSED (100%)</div>
                 </div>
                 <div class="check-grid">
-                  <div class="check-item"><span>✓</span> <span>MALICIOUS INJECTION REFUSAL REGRESSIONS</span></div>
-                  <div class="check-item"><span>✓</span> <span>UNCERTAIN NETWORK & 5XX RECONCILIATION</span></div>
-                  <div class="check-item"><span>✓</span> <span>PRE-SELECTION REVIEW-PAUSE RESUME</span></div>
+                  <div id="chk-reg1" class="check-item"><span>✓</span> <span>MALICIOUS INJECTION REFUSAL REGRESSIONS</span></div>
+                  <div id="chk-reg2" class="check-item"><span>✓</span> <span>UNCERTAIN NETWORK & 5XX RECONCILIATION</span></div>
+                  <div id="chk-reg3" class="check-item"><span>✓</span> <span>PRE-SELECTION REVIEW-PAUSE RESUME</span></div>
                 </div>
               </div>
             </div>
@@ -345,35 +338,16 @@
 
       <script>
         const tl = gsap.timeline({ paused: true });
-        const cardSuite = document.getElementById("card-suite");
-        const vidRetry = document.getElementById("vid-retry");
 
         // Phase 1: Retry (0s - 10s)
-        tl.from(".window-frame", { scale: 0.94, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.1)
-          .from(".info-panel", { x: 40, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2)
+        tl.from(".window-frame", { scale: 0.96, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.1)
+          .from(".info-panel", { x: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2)
+          // Docked pill pops in window header at 2.5s (Zero occlusion)
           .fromTo("#badge-dupes", 
-            { scale: 0, opacity: 0, rotation: -15 }, 
-            { scale: 1, opacity: 1, rotation: -3, duration: 0.5, ease: "back.out(2)" }, 
+            { scale: 0, opacity: 0 }, 
+            { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" }, 
             2.5
           );
-
-        // Zoom into retry video at 3.5s
-        tl.to(vidRetry, {
-          scale: 1.3,
-          x: 20,
-          y: -20,
-          duration: 0.8,
-          ease: "power2.out"
-        }, 3.5);
-
-        // Zoom out vidRetry at 8.5s
-        tl.to(vidRetry, {
-          scale: 1,
-          x: 0,
-          y: 0,
-          duration: 0.6,
-          ease: "power2.inOut"
-        }, 8.5);
 
         // Phase 2: Tests (10s - 20s)
         tl.to("#badge-dupes", { opacity: 0, duration: 0.3 }, 9.5)
@@ -382,19 +356,23 @@
           .set("#card-t-act4", { textContent: "42 AUTOMATED TESTS" }, 10.0)
           .set("#card-d-act4", { textContent: "Every failure condition and network boundary is continuously exercised with mock destination adapters and strict assertions." }, 10.0)
           .set("#card-c-act4", { textContent: "pytest tests/ -q\n================ 42 passed in 12.84s ================\nStatus: 100% GREEN" }, 10.0)
-          .from("#test-num", { scale: 0.8, color: "#000", duration: 0.4, ease: "back.out(2)" }, 10.5)
-          // Zoom into 42 passed test suite card at 12s
-          .to(cardSuite, {
-            scale: 1.25,
-            x: -25,
-            y: -15,
-            duration: 0.8,
+          // Punch stat number 42 / 42 with snappy motion spring at 10.5s
+          .fromTo("#test-num", 
+            { scale: 0.75, opacity: 0 }, 
+            { scale: 1.0, opacity: 1, duration: 0.45, ease: "back.out(2)" }, 
+            10.5
+          )
+          .from(["#chk-reg1", "#chk-reg2", "#chk-reg3"], {
+            x: -15,
+            opacity: 0,
+            duration: 0.3,
+            stagger: 0.12,
             ease: "power2.out"
-          }, 12.0)
+          }, 11.0)
           .set("#caption-4", { textContent: "42 AUTOMATED TESTS PROVE RESILIENCE UNDER NETWORK FAULTS & MALICIOUS ATTACKS" }, 10.0);
 
         // Act 4 Exit
-        tl.to(".scene-container", { y: -30, opacity: 0, duration: 0.5, ease: "power2.in" }, 19.4);
+        tl.to(".scene-container", { y: -25, opacity: 0, duration: 0.5, ease: "power2.in" }, 19.4);
 
         window.__timelines["act4-retry"] = tl;
       </script>
