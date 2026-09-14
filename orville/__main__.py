@@ -38,9 +38,13 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     for command, help_text in (("run", "run the legacy guarded handoff"),
-                               ("run-strands", "run the Strands guarded handoff")):
+                               ("run-strands", "run the Strands guarded handoff"),
+                               ("resume-strands", "resume a human-reviewed issue choice")):
         p_run = sub.add_parser(command, help=help_text)
         p_run.add_argument("--report-id", required=True)
+        if command == "resume-strands":
+            p_run.add_argument("--issue-number", required=True, type=int,
+                               help="operator-selected issue number from the recorded review options")
         src = p_run.add_mutually_exclusive_group(required=True)
         src.add_argument("--text-file", help="file containing the report text")
         src.add_argument("--text", help="report text inline")
@@ -59,7 +63,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     text = args.text if args.text else open(args.text_file, "r", encoding="utf-8").read()
-    if args.cmd == "run-strands":
+    if args.cmd in ("run-strands", "resume-strands"):
         from .discord_client import DiscordClient
         from .github_client import GitHubClient
         from .strands_runtime import run_strands
@@ -70,7 +74,8 @@ def main(argv: list[str] | None = None) -> int:
             "trello": TrelloClient(cfg.trello_api_key, cfg.trello_token),
             "discord": DiscordClient(cfg.discord_webhook_url),
         }
-        result = run_strands(args.report_id, text, cfg, clients)
+        result = run_strands(args.report_id, text, cfg, clients,
+                             review_issue_number=args.issue_number if args.cmd == "resume-strands" else None)
     else:
         result = run(args.report_id, text, cfg)
     _print_result(result)
