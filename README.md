@@ -19,7 +19,7 @@
 
 ## ▶ 2-Minute Demo Walkthrough
 
-- **Video Walkthrough (2:15 min)**: **[Watch Demo Video on YouTube](https://youtu.be/your-demo)** *(Replace with your uploaded YouTube link)*
+- **Video Walkthrough (2:15 min)**: **[Watch Demo Video on Vimeo](https://vimeo.com/1226772647)**
 - **Live Production App & Proof Receipts**: **[https://orville-tau.vercel.app](https://orville-tau.vercel.app)**
 - **Public GitHub Repository**: **[https://github.com/emmaGH1/orville](https://github.com/emmaGH1/orville)**
 
